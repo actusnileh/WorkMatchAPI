@@ -1,0 +1,18 @@
+services:
+    fastapi:
+        container_name: work_match_api
+        build: ..
+        environment:
+            - PYTHONPATH=./src
+        ports:
+            - ${API_PORT}:8000
+        command: >
+            uvicorn --factory src.api.main:create_app --reload --host 0.0.0.0 --port 8000
+        volumes:
+            - ..:/work_match_api
+        networks:
+            - work_match_api
+
+networks:
+    work_match_api:
+        driver: bridge
