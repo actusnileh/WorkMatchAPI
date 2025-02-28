@@ -17,6 +17,7 @@ passlib = "^1.7.4"
 bcrypt = "^4.3.0"
 cryptography = "^44.0.1"
 asyncpg = "^0.30.0"
+pydantic = {extras = ["email"], version = "^2.10.6"}
 
 
 [tool.poetry.group.dev.dependencies]
