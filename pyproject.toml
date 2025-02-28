@@ -10,6 +10,13 @@ python = "^3.12"
 fastapi = "^0.115.8"
 pydantic-settings = "^2.8.0"
 uvicorn = "^0.34.0"
+sqlalchemy = "^2.0.38"
+pyjwt = "^2.10.1"
+python-jose = "^3.4.0"
+passlib = "^1.7.4"
+bcrypt = "^4.3.0"
+cryptography = "^44.0.1"
+asyncpg = "^0.30.0"
 
 
 [tool.poetry.group.dev.dependencies]
