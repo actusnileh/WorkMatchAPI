@@ -2,7 +2,12 @@
 
 import re
 
-from pydantic import BaseModel, EmailStr, constr, field_validator
+from pydantic import (
+    BaseModel,
+    constr,
+    EmailStr,
+    field_validator,
+)
 
 
 class RegisterUserRequest(BaseModel):

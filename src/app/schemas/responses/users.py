@@ -1,4 +1,8 @@
-from pydantic import UUID4, BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field,
+    UUID4,
+)
 
 
 class UserResponse(BaseModel):

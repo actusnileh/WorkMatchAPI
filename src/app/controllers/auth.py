@@ -1,12 +1,16 @@
 from pydantic import EmailStr
+
 from app.models import User
 from app.repositories import UserRepository
+from app.schemas.extras.token import Token
 from core.controller import BaseController
 from core.database import Transactional
-from core.exceptions import BadRequestException, UnauthorizedException
-from core.security.password import PasswordHandler
-from app.schemas.extras.token import Token
+from core.exceptions import (
+    BadRequestException,
+    UnauthorizedException,
+)
 from core.security.jwt import JWTHandler
+from core.security.password import PasswordHandler
 
 
 class AuthController(BaseController[User]):
@@ -25,7 +29,7 @@ class AuthController(BaseController[User]):
 
         if user:
             raise BadRequestException(
-                "Пользователь с таким username уже зарегистрирован"
+                "Пользователь с таким username уже зарегистрирован",
             )
 
         password = PasswordHandler.password_hash(password)
@@ -35,7 +39,7 @@ class AuthController(BaseController[User]):
                 "email": email,
                 "password": password,
                 "username": username,
-            }
+            },
         )
 
     async def login(self, email: EmailStr, password: str) -> Token:
