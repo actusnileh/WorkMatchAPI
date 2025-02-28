@@ -27,7 +27,7 @@ async def get_user_principals(
     request: Request,
     user_controller: UserController = Depends(Factory().get_user_controller),
 ) -> list:
-    user_id = request.user.id
+    user_id = request.user.o_id
     principals = [Everyone]
 
     if not user_id:

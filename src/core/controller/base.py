@@ -37,7 +37,7 @@ class BaseController(Generic[ModelType]):
         """
 
         db_obj = await self.repository.get_by(
-            field="id",
+            field="o_id",
             value=id_,
             join_=join_,
             unique=True,

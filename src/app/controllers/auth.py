@@ -52,7 +52,7 @@ class AuthController(BaseController[User]):
             raise BadRequestException("Invalid credentials")
 
         return Token(
-            access_token=JWTHandler.encode(payload={"user_id": user.id}),
+            access_token=JWTHandler.encode(payload={"user_id": user.o_id}),
             refresh_token=JWTHandler.encode(payload={"sub": "refresh_token"}),
         )
 
