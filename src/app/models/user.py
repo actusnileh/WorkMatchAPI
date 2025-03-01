@@ -17,7 +17,6 @@ from core.security.access_control import (
     Allow,
     Everyone,
     RolePrincipal,
-    UserPrincipal,
 )
 
 
@@ -38,7 +37,6 @@ class User(Base, TimestampMixin):
     username = Column(Unicode(255), nullable=False, unique=True)
     full_name = Column(Unicode(255), nullable=False)
     is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)
     role_id = Column(BigInteger, ForeignKey("roles.o_id"), nullable=True)
     employment_type_id = Column(
         BigInteger,
@@ -53,16 +51,9 @@ class User(Base, TimestampMixin):
     __mapper_args__ = {"eager_defaults": True}
 
     def __acl__(self):
-        basic_permissions = [UserPermission.READ, UserPermission.CREATE]
-        self_permissions = [
-            UserPermission.READ,
-            UserPermission.EDIT,
-            UserPermission.CREATE,
-        ]
-        all_permissions = list(UserPermission)
-
         return [
-            (Allow, Everyone, basic_permissions),
-            (Allow, UserPrincipal(value=self.o_id), self_permissions),
-            (Allow, RolePrincipal(value="admin"), all_permissions),
+            (Allow, RolePrincipal("admin"), ["create", "read", "edit", "delete"]),
+            (Allow, RolePrincipal("hr"), ["create", "read", "edit"]),
+            (Allow, RolePrincipal("user"), ["read"]),
+            (Allow, Everyone, ["read"]),
         ]

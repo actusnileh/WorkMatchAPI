@@ -38,8 +38,8 @@ async def get_user_principals(
     principals.append(Authenticated)
     principals.append(UserPrincipal(user.o_id))
 
-    if user.is_admin:
-        principals.append(RolePrincipal("admin"))
+    if user.role:
+        principals.append(RolePrincipal(user.role.name))
 
     return principals
 
