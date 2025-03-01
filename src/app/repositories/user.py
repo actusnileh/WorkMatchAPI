@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from app.models import User, Role, EmploymentType
 from core.repository import BaseRepository
 
@@ -34,11 +35,12 @@ class UserRepository(BaseRepository[User]):
         name: str,
         join_: set[str] | None = None,
     ) -> Role | None:
-        query = self._query(join_)
+        query = select(Role)
+        query = self._maybe_join(query, join_)
         query = query.filter(Role.name == name)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._all_unique(query)
 
         return await self._one_or_none(query)
 
@@ -47,10 +49,11 @@ class UserRepository(BaseRepository[User]):
         name: str,
         join_: set[str] | None = None,
     ) -> EmploymentType | None:
-        query = self._query(join_)
+        query = select(EmploymentType)
+        query = self._maybe_join(query, join_)
         query = query.filter(EmploymentType.name == name)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._all_unique(query)
 
         return await self._one_or_none(query)

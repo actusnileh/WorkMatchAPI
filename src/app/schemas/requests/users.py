@@ -12,8 +12,8 @@ from pydantic import (
 
 
 class RoleName(str, Enum):
-    HR = "hr"
     USER = "user"
+    HR = "hr"
 
 
 class EmploymentTypeName(str, Enum):

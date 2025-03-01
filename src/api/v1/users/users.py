@@ -33,7 +33,7 @@ async def register_user(
         password=register_user_request.password,
         username=register_user_request.username,
         full_name=register_user_request.full_name,
-        role_str=register_user_request.role,
+        role_str=register_user_request.role.value,
         employment_type_str=register_user_request.employment_type.value,
     )
 

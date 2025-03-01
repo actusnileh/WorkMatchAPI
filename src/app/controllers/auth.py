@@ -42,6 +42,7 @@ class AuthController(BaseController[User]):
 
         role: Role = await self.user_repository.get_role_by_name(role_str)
         if not role:
+            print(role, "| |", role_str)
             raise BadRequestException("Указанная роль не найдена")
 
         employment_type: EmploymentType = (
