@@ -7,6 +7,7 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
+
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), "src"))
 sys.path.append(parent_dir)
 
@@ -31,8 +32,8 @@ from src.app.models import Base
 # For auto generate schemas
 from src.core.config import config as app_config
 
+
 target_metadata = Base.metadata
-print(app_config.POSTGRES_URL)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -48,7 +49,7 @@ def run_migrations_offline():
     Calls to context.execute() here emit the given string to the
     script output.
     """
-    url = config.get_main_option("sqlalchemy.url")
+    config.get_main_option("sqlalchemy.url")
     context.configure(
         url=app_config.POSTGRES_URL,
         target_metadata=target_metadata,

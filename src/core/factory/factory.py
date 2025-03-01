@@ -12,11 +12,6 @@ from core.database import get_session
 
 
 class Factory:
-    """
-    This is the factory container that will instantiate all the controllers and
-    repositories which can be accessed by the rest of the application.
-    """
-
     user_repository = partial(UserRepository, User)
 
     def get_user_controller(self, db_session=Depends(get_session)):

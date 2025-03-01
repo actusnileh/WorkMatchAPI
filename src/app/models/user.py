@@ -5,9 +5,11 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     Column,
+    ForeignKey,
     Unicode,
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from core.database import Base
 from core.database.mixins import TimestampMixin
@@ -34,7 +36,19 @@ class User(Base, TimestampMixin):
     email = Column(Unicode(255), nullable=False, unique=True)
     password = Column(Unicode(255), nullable=False)
     username = Column(Unicode(255), nullable=False, unique=True)
+    full_name = Column(Unicode(255), nullable=False)
+    is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
+    role_id = Column(BigInteger, ForeignKey("roles.o_id"), nullable=True)
+    employment_type_id = Column(
+        BigInteger,
+        ForeignKey("employment_types.o_id"),
+        nullable=True,
+    )
+
+    role = relationship("Role", back_populates="users")
+    employment_type = relationship("EmploymentType", back_populates="users")
+    vacancies = relationship("Vacancy", back_populates="creator")
 
     __mapper_args__ = {"eager_defaults": True}
 
