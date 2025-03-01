@@ -14,6 +14,7 @@ class RegisterUserRequest(BaseModel):
     email: EmailStr
     password: constr(min_length=8, max_length=64)
     username: constr(min_length=3, max_length=64)
+    full_name: constr(min_length=3, max_length=64)
 
     @field_validator("password")
     def password_must_contain_numbers(cls, v):

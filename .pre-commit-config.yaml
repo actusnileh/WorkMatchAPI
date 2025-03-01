@@ -1,5 +1,5 @@
 fail_fast: false
-exclude: ^.*\b(alembic)\b.*$
+exclude: ^.*\b(migrations)\b.*$
 repos:
     - repo: https://github.com/asottile/add-trailing-comma
       rev: v3.1.0
@@ -18,12 +18,12 @@ repos:
                     --remove-unused-variables,
                 ]
 
-    -   repo: https://github.com/psf/black
-        rev: 25.1.0
-        hooks:
-        -   id: black
+    - repo: https://github.com/psf/black
+      rev: 25.1.0
+      hooks:
+          - id: black
             language_version: python3.13
-            args: ['-S']
+            args: ["-S"]
 
     - repo: https://github.com/pycqa/isort
       rev: 6.0.0

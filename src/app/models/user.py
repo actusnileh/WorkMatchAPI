@@ -1,4 +1,3 @@
-from enum import Enum
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -18,13 +17,6 @@ from core.security.access_control import (
     Everyone,
     RolePrincipal,
 )
-
-
-class UserPermission(Enum):
-    CREATE = "create"
-    READ = "read"
-    EDIT = "edit"
-    DELETE = "delete"
 
 
 class User(Base, TimestampMixin):

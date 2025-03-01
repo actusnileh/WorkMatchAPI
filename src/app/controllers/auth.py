@@ -19,7 +19,13 @@ class AuthController(BaseController[User]):
         self.user_repository = user_repository
 
     @Transactional()
-    async def register(self, email: EmailStr, password: str, username: str) -> User:
+    async def register(
+        self,
+        email: EmailStr,
+        password: str,
+        username: str,
+        full_name: str,
+    ) -> User:
         user = await self.user_repository.get_by_email(email)
 
         if user:
@@ -39,6 +45,7 @@ class AuthController(BaseController[User]):
                 "email": email,
                 "password": password,
                 "username": username,
+                "full_name": full_name,
             },
         )
 

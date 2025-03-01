@@ -48,6 +48,7 @@ async def register_user(
         email=register_user_request.email,
         password=register_user_request.password,
         username=register_user_request.username,
+        full_name=register_user_request.full_name,
     )
 
 
