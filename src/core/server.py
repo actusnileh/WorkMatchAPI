@@ -16,6 +16,7 @@ from core.fastapi.middlewares import (
     AuthenticationMiddleware,
     SQLAlchemyMiddleware,
 )
+from core.fastapi.middlewares import UserActionMiddleware
 
 
 def on_auth_error(request: Request, exc: Exception):
@@ -59,6 +60,7 @@ def make_middleware() -> List[Middleware]:
             on_error=on_auth_error,
         ),
         Middleware(SQLAlchemyMiddleware),
+        Middleware(UserActionMiddleware),
     ]
     return middleware
 

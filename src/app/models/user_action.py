@@ -9,10 +9,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from core.database import Base
-from core.database.mixins import TimestampMixin
 
 
-class UserAction(Base, TimestampMixin):
+class UserAction(Base):
     __tablename__ = "user_actions"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)

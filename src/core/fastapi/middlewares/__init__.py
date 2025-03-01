@@ -3,6 +3,7 @@ from .authentication import (
     AuthenticationMiddleware,
 )
 from .sqlalchemy import SQLAlchemyMiddleware
+from .user_action_logger import UserActionMiddleware
 
 
 __all__ = [
