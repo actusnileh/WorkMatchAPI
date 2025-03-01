@@ -1,24 +1,13 @@
-from app.models import User
+from app.models import User, Role, EmploymentType
 from core.repository import BaseRepository
 
 
 class UserRepository(BaseRepository[User]):
-    """
-    User repository provides all the database operations for the User model.
-    """
-
     async def get_by_username(
         self,
         username: str,
         join_: set[str] | None = None,
     ) -> User | None:
-        """
-        Get user by username.
-
-        :param username: Username.
-        :param join_: Join relations.
-        :return: User.
-        """
         query = self._query(join_)
         query = query.filter(User.username == username)
 
@@ -32,15 +21,34 @@ class UserRepository(BaseRepository[User]):
         email: str,
         join_: set[str] | None = None,
     ) -> User | None:
-        """
-        Get user by email.
-
-        :param email: Email.
-        :param join_: Join relations.
-        :return: User.
-        """
         query = self._query(join_)
         query = query.filter(User.email == email)
+
+        if join_ is not None:
+            return await self.all_unique(query)
+
+        return await self._one_or_none(query)
+
+    async def get_role_by_name(
+        self,
+        name: str,
+        join_: set[str] | None = None,
+    ) -> Role | None:
+        query = self._query(join_)
+        query = query.filter(Role.name == name)
+
+        if join_ is not None:
+            return await self.all_unique(query)
+
+        return await self._one_or_none(query)
+
+    async def get_employment_type_by_name(
+        self,
+        name: str,
+        join_: set[str] | None = None,
+    ) -> EmploymentType | None:
+        query = self._query(join_)
+        query = query.filter(EmploymentType.name == name)
 
         if join_ is not None:
             return await self.all_unique(query)

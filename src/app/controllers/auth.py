@@ -1,6 +1,6 @@
 from pydantic import EmailStr
 
-from app.models import User
+from app.models import User, EmploymentType, Role
 from app.repositories import UserRepository
 from app.schemas.extras.token import Token
 from core.controller import BaseController
@@ -25,6 +25,8 @@ class AuthController(BaseController[User]):
         password: str,
         username: str,
         full_name: str,
+        role_str: str,
+        employment_type_str: str,
     ) -> User:
         user = await self.user_repository.get_by_email(email)
 
@@ -38,6 +40,16 @@ class AuthController(BaseController[User]):
                 "Пользователь с таким username уже зарегистрирован",
             )
 
+        role: Role = await self.user_repository.get_role_by_name(role_str)
+        if not role:
+            raise BadRequestException("Указанная роль не найдена")
+
+        employment_type: EmploymentType = (
+            await self.user_repository.get_employment_type_by_name(employment_type_str)
+        )
+        if not employment_type:
+            raise BadRequestException("Указанный тип занятости не найден")
+
         password = PasswordHandler.password_hash(password)
 
         return await self.user_repository.create(
@@ -46,6 +58,8 @@ class AuthController(BaseController[User]):
                 "password": password,
                 "username": username,
                 "full_name": full_name,
+                "role_id": role.o_id,
+                "employment_type_id": employment_type.o_id,
             },
         )
 

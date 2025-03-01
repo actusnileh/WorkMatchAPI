@@ -1,5 +1,6 @@
 # pylint: disable=all
 
+from enum import Enum
 import re
 
 from pydantic import (
@@ -10,11 +11,23 @@ from pydantic import (
 )
 
 
+class RoleName(str, Enum):
+    HR = "hr"
+    USER = "user"
+
+
+class EmploymentTypeName(str, Enum):
+    FULL_TIME = "full-time"
+    PART_TIME = "part-time"
+
+
 class RegisterUserRequest(BaseModel):
     email: EmailStr
     password: constr(min_length=8, max_length=64)
     username: constr(min_length=3, max_length=64)
     full_name: constr(min_length=3, max_length=64)
+    role: RoleName
+    employment_type: EmploymentTypeName
 
     @field_validator("password")
     def password_must_contain_numbers(cls, v):

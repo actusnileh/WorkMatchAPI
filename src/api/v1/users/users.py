@@ -1,5 +1,3 @@
-from typing import Callable
-
 from fastapi import (
     APIRouter,
     Depends,
@@ -7,11 +5,9 @@ from fastapi import (
 
 from app.controllers import (
     AuthController,
-    UserController,
 )
 from app.models.user import (
     User,
-    UserPermission,
 )
 from app.schemas.extras.token import Token
 from app.schemas.requests.users import (
@@ -22,21 +18,9 @@ from app.schemas.responses.users import UserResponse
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
-from core.fastapi.dependencies.permissions import Permissions
 
 
 user_router = APIRouter()
-
-
-@user_router.get("/", dependencies=[Depends(AuthenticationRequired)])
-async def get_users(
-    user_controller: UserController = Depends(Factory().get_user_controller),
-    assert_access: Callable = Depends(Permissions(UserPermission.READ)),
-) -> list[UserResponse]:
-    users = await user_controller.get_all()
-
-    assert_access(resource=users)
-    return users
 
 
 @user_router.post("/", status_code=201)
@@ -49,6 +33,8 @@ async def register_user(
         password=register_user_request.password,
         username=register_user_request.username,
         full_name=register_user_request.full_name,
+        role_str=register_user_request.role,
+        employment_type_str=register_user_request.employment_type.value,
     )
 
 

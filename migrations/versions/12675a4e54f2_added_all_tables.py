@@ -34,11 +34,7 @@ def upgrade() -> None:
     op.create_table(
         "roles",
         sa.Column("o_id", sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.Column(
-            "name",
-            sa.Enum("HR", "ADMIN", "USER", name="rolename"),
-            nullable=False,
-        ),
+        sa.Column("name", sa.Unicode(length=50), nullable=False),
         sa.PrimaryKeyConstraint("o_id"),
         sa.UniqueConstraint("name"),
     )
