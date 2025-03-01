@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["actusnileh <actusnileh@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -19,6 +20,7 @@ cryptography = "^44.0.1"
 asyncpg = "^0.30.0"
 pydantic = {extras = ["email"], version = "^2.10.6"}
 alembic = "^1.14.1"
+debugpy = "^1.8.12"
 
 
 [tool.poetry.group.dev.dependencies]

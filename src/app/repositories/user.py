@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.models import User, Role, EmploymentType
 from core.repository import BaseRepository
 
@@ -57,3 +58,6 @@ class UserRepository(BaseRepository[User]):
             return await self._all_unique(query)
 
         return await self._one_or_none(query)
+
+    def _join_role(self, query):
+        return query.join(User.role).options(selectinload(User.role))

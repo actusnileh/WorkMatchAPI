@@ -6,8 +6,9 @@ services:
             - PYTHONPATH=./src
         ports:
             - ${API_PORT}:8000
+            - 5678:5678
         command: >
-            poetry run python src/main.py
+            debugpy --listen 0.0.0.0:5678 -m uvicorn --factory src.core.server:create_app --reload --host 0.0.0.0 --port 8000
         volumes:
             - ..:/work_match_api
         networks:

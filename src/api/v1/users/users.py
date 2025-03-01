@@ -53,4 +53,5 @@ async def login_user(
 def get_user(
     user: User = Depends(get_current_user),
 ) -> UserResponse:
-    return user
+    user = user[0]
+    return UserResponse.from_orm_instance(user)
