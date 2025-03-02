@@ -1,7 +1,7 @@
 # pylint: disable=all
 
-from enum import Enum
 import re
+from enum import Enum
 
 from pydantic import (
     BaseModel,
@@ -45,3 +45,9 @@ class RegisterUserRequest(BaseModel):
 class LoginUserRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class EditUserRequest(BaseModel):
+    full_name: str | None = None
+    email: EmailStr | None = None
+    username: str | None = None

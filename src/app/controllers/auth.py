@@ -1,6 +1,10 @@
 from pydantic import EmailStr
 
-from app.models import User, EmploymentType, Role
+from app.models import (
+    EmploymentType,
+    Role,
+    User,
+)
 from app.repositories import UserRepository
 from app.schemas.extras.token import Token
 from core.controller import BaseController

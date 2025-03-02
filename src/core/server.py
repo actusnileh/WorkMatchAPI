@@ -15,8 +15,8 @@ from core.fastapi.middlewares import (
     AuthBackend,
     AuthenticationMiddleware,
     SQLAlchemyMiddleware,
+    UserActionMiddleware,
 )
-from core.fastapi.middlewares import UserActionMiddleware
 
 
 def on_auth_error(request: Request, exc: Exception):

@@ -5,12 +5,12 @@ from fastapi import (
 
 from app.controllers import (
     AuthController,
+    UserController,
 )
-from app.models.user import (
-    User,
-)
+from app.models.user import User
 from app.schemas.extras.token import Token
 from app.schemas.requests.users import (
+    EditUserRequest,
     LoginUserRequest,
     RegisterUserRequest,
 )
@@ -55,3 +55,22 @@ def get_user(
 ) -> UserResponse:
     user = user[0]
     return UserResponse.from_orm_instance(user)
+
+
+@user_router.post("/edit", dependencies=[Depends(AuthenticationRequired)])
+async def edit_user(
+    edit_user_request: EditUserRequest,
+    user: User = Depends(get_current_user),
+    user_controller: UserController = Depends(Factory().get_user_controller),
+) -> UserResponse:
+    user = user[0]
+    updated_user = await user_controller.update_by_user(
+        user=user,
+        attrs=edit_user_request.model_dump(exclude_unset=True),
+    )
+    return UserResponse.from_orm_instance(updated_user)
+
+
+@user_router.post("/edit_password", dependencies=[Depends(AuthenticationRequired)])
+def edit_user_password():
+    return ""

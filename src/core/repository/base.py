@@ -248,3 +248,23 @@ class BaseRepository(Generic[ModelType]):
         :return: The query with the given join.
         """
         return getattr(self, "_join_" + join_)(query)
+
+    async def _update(
+        self,
+        model: ModelType,
+        attributes: dict[str, Any],
+    ) -> ModelType:
+        """
+        Обновляет указанный объект модели.
+
+        :param model: Объект модели для обновления.
+        :param attributes: Словарь атрибутов и их значений.
+        :return: Обновленный объект модели.
+        """
+        for key, value in attributes.items():
+            if hasattr(model, key):
+                setattr(model, key, value)
+        self.session.add(model)
+        await self.session.commit()
+        await self.session.refresh(model)
+        return model

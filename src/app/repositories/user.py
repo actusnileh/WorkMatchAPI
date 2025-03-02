@@ -1,6 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.models import User, Role, EmploymentType
+
+from app.models import (
+    EmploymentType,
+    Role,
+    User,
+)
 from core.repository import BaseRepository
 
 

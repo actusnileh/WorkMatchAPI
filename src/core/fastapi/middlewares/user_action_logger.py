@@ -1,8 +1,14 @@
 from starlette.requests import Request
-from starlette.types import ASGIApp, Receive, Scope, Send
-from core.database.standalone_session import standalone_session
+from starlette.types import (
+    ASGIApp,
+    Receive,
+    Scope,
+    Send,
+)
+
 from app.models import UserAction
 from app.schemas.extras.current_user import CurrentUser
+from core.database.standalone_session import standalone_session
 from src.core.database.session import async_session_factory
 
 
@@ -12,7 +18,11 @@ class UserActionMiddleware:
 
     @standalone_session
     async def log_user_action(
-        self, user_id: int, action: str, action_type: str, target_id: int | None
+        self,
+        user_id: int,
+        action: str,
+        action_type: str,
+        target_id: int | None,
     ):
         async with async_session_factory() as db_session:
             user_action = UserAction(
