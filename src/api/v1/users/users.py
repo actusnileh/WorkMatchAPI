@@ -10,6 +10,7 @@ from app.controllers import (
 from app.models.user import User
 from app.schemas.extras.token import Token
 from app.schemas.requests.users import (
+    EditPasswordRequest,
     EditUserRequest,
     LoginUserRequest,
     RegisterUserRequest,
@@ -57,7 +58,7 @@ def get_user(
     return UserResponse.from_orm_instance(user)
 
 
-@user_router.post("/edit", dependencies=[Depends(AuthenticationRequired)])
+@user_router.patch("/edit", dependencies=[Depends(AuthenticationRequired)])
 async def edit_user(
     edit_user_request: EditUserRequest,
     user: User = Depends(get_current_user),
@@ -71,6 +72,16 @@ async def edit_user(
     return UserResponse.from_orm_instance(updated_user)
 
 
-@user_router.post("/edit_password", dependencies=[Depends(AuthenticationRequired)])
-def edit_user_password():
-    return ""
+@user_router.patch("/edit_password", dependencies=[Depends(AuthenticationRequired)])
+async def edit_user_password(
+    edit_password_request: EditPasswordRequest,
+    user: User = Depends(get_current_user),
+    auth_controller: AuthController = Depends(Factory().get_auth_controller),
+):
+    user = user[0]
+    updated_user = await auth_controller.update_password(
+        user,
+        edit_password_request.old_password,
+        edit_password_request.new_password,
+    )
+    return UserResponse.from_orm_instance(updated_user)

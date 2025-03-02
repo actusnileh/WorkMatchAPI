@@ -92,3 +92,15 @@ class AuthController(BaseController[User]):
             access_token=JWTHandler.encode(payload={"user_id": token.get("user_id")}),
             refresh_token=JWTHandler.encode(payload={"sub": "refresh_token"}),
         )
+
+    async def update_password(
+        self, user: User, old_password: str, new_password: str
+    ) -> Token:
+        if not PasswordHandler.verify(user.password, old_password):
+            raise BadRequestException("Invalid credentials")
+        updated_user = await self.user_repository._update(
+            user,
+            attributes={"password": PasswordHandler.password_hash(new_password)},
+        )
+
+        return updated_user

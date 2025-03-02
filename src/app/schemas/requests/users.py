@@ -51,3 +51,14 @@ class EditUserRequest(BaseModel):
     full_name: str | None = None
     email: EmailStr | None = None
     username: str | None = None
+
+
+class EditPasswordRequest(BaseModel):
+    old_password: str
+    new_password: constr(min_length=8, max_length=64)
+
+    @field_validator("new_password")
+    def password_must_contain_numbers(cls, v):
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain numbers")
+        return v
