@@ -4,7 +4,10 @@ from fastapi import (
 )
 
 from app.controllers import VacancyController
-from app.models import User
+from app.models import (
+    User,
+    Vacancy,
+)
 from app.schemas.requests.vacancy import CreateVacancyRequest
 from app.schemas.responses.vacancy import VacancyResponse
 from core.factory import Factory
@@ -29,19 +32,37 @@ async def create_vacancy(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
-    vacancy = await vacancy_controller.create_vacancy(
+    vacancy: Vacancy = await vacancy_controller.create_vacancy(
         title=create_vacancy_request.title,
         description=create_vacancy_request.description,
         requirements=create_vacancy_request.requirements,
         conditions=create_vacancy_request.conditions,
+        salary=create_vacancy_request.salary,
         created_by=user,
         employment_type_str=create_vacancy_request.employment_type_str,
     )
 
     return VacancyResponse(
+        uuid=vacancy.uuid,
         title=vacancy.title,
         description=vacancy.description,
         requirements=vacancy.requirements,
         conditions=vacancy.conditions,
+        salary=vacancy.salary,
         employment_type=vacancy.employment_type.name,
     )
+
+
+@vacancy_router.patch(
+    "/edit",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["hr", "admin"])),
+    ],
+    status_code=201,
+)
+async def edit_vacancy(
+    user: User = Depends(get_current_user),
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> VacancyResponse:
+    return ""

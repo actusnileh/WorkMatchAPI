@@ -20,6 +20,7 @@ class VacancyController(BaseController[Vacancy]):
         description: str,
         requirements: str,
         conditions: str,
+        salary: float,
         created_by: User,
         employment_type_str: str,
     ) -> Vacancy:
@@ -44,6 +45,7 @@ class VacancyController(BaseController[Vacancy]):
                 "description": description,
                 "requirements": requirements,
                 "conditions": conditions,
+                "salary": salary,
                 "created_by": created_by.o_id,
                 "employment_type": employment_type,
             },
