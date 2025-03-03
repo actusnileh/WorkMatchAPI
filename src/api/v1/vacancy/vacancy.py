@@ -3,20 +3,26 @@ from fastapi import (
     Depends,
 )
 
-from core.fastapi.dependencies.authentication import AuthenticationRequired
 from app.controllers import VacancyController
-from core.factory import Factory
 from app.models import User
-from core.fastapi.dependencies.current_user import get_current_user
 from app.schemas.requests.vacancy import CreateVacancyRequest
 from app.schemas.responses.vacancy import VacancyResponse
+from core.factory import Factory
+from core.fastapi.dependencies.authentication import AuthenticationRequired
+from core.fastapi.dependencies.current_user import get_current_user
+from src.core.fastapi.dependencies.role_required import RoleRequired
 
 
 vacancy_router = APIRouter()
 
 
 @vacancy_router.post(
-    "/", dependencies=[Depends(AuthenticationRequired)], status_code=201
+    "/",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["hr", "admin"])),
+    ],
+    status_code=201,
 )
 async def create_vacancy(
     create_vacancy_request: CreateVacancyRequest,
@@ -28,7 +34,7 @@ async def create_vacancy(
         description=create_vacancy_request.description,
         requirements=create_vacancy_request.requirements,
         conditions=create_vacancy_request.conditions,
-        created_by=user[0],
+        created_by=user,
         employment_type_str=create_vacancy_request.employment_type_str,
     )
 

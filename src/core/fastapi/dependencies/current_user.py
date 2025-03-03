@@ -15,4 +15,4 @@ async def get_current_user(
         request.user.o_id,
         join_={"role"},
     )
-    return user
+    return user[0]

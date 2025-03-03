@@ -5,9 +5,7 @@ from app.models import (
 from app.repositories import VacancyRepository
 from core.controller import BaseController
 from core.database import Transactional
-from core.exceptions import (
-    BadRequestException,
-)
+from core.exceptions import BadRequestException
 
 
 class VacancyController(BaseController[Vacancy]):
@@ -26,11 +24,11 @@ class VacancyController(BaseController[Vacancy]):
         employment_type_str: str,
     ) -> Vacancy:
         employment_type = await self.vacancy_repository.get_employment_type_by_name(
-            employment_type_str
+            employment_type_str,
         )
         if not employment_type:
             raise BadRequestException(
-                "Указанный тип занятости не найден. Возможные значения: full-time, part-time"
+                "Указанный тип занятости не найден. Возможные значения: full-time, part-time",
             )
         vacancy: Vacancy = await self.vacancy_repository.get_by_filters(
             title=title,

@@ -1,6 +1,7 @@
 from app.models import User
 from app.repositories import UserRepository
 from core.controller import BaseController
+from src.core.utils.datetime_util import utcnow
 
 
 class UserController(BaseController[User]):
@@ -15,4 +16,5 @@ class UserController(BaseController[User]):
         return await self.user_repository.get_by_email(email)
 
     async def update_by_user(self, user: User, attrs) -> User:
+        attrs["updated_at"] = utcnow()
         return await self.user_repository._update(user, attrs)

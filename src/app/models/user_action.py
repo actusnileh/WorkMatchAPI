@@ -3,12 +3,12 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    func,
     Unicode,
 )
 from sqlalchemy.orm import relationship
 
 from core.database import Base
+from core.utils import utcnow
 
 
 class UserAction(Base):
@@ -19,7 +19,7 @@ class UserAction(Base):
     action = Column(Unicode(255), nullable=False)
     target_id = Column(BigInteger)
     target_type = Column(Unicode(50))
-    timestamp = Column(DateTime, default=func.now())
+    timestamp = Column(DateTime, default=utcnow())
 
     user = relationship("User")
 

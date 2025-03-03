@@ -54,7 +54,6 @@ async def login_user(
 def get_user(
     user: User = Depends(get_current_user),
 ) -> UserResponse:
-    user = user[0]
     return UserResponse.from_orm_instance(user)
 
 
@@ -64,7 +63,6 @@ async def edit_user(
     user: User = Depends(get_current_user),
     user_controller: UserController = Depends(Factory().get_user_controller),
 ) -> UserResponse:
-    user = user[0]
     updated_user = await user_controller.update_by_user(
         user=user,
         attrs=edit_user_request.model_dump(exclude_unset=True),
@@ -78,7 +76,6 @@ async def edit_user_password(
     user: User = Depends(get_current_user),
     auth_controller: AuthController = Depends(Factory().get_auth_controller),
 ):
-    user = user[0]
     updated_user = await auth_controller.update_password(
         user,
         edit_password_request.old_password,

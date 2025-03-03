@@ -12,11 +12,6 @@ from sqlalchemy.orm import relationship
 
 from core.database import Base
 from core.database.mixins import TimestampMixin
-from core.security.access_control import (
-    Allow,
-    Everyone,
-    RolePrincipal,
-)
 
 
 class User(Base, TimestampMixin):
@@ -41,11 +36,3 @@ class User(Base, TimestampMixin):
     vacancies = relationship("Vacancy", back_populates="creator")
 
     __mapper_args__ = {"eager_defaults": True}
-
-    def __acl__(self):
-        return [
-            (Allow, RolePrincipal("admin"), ["create", "read", "edit", "delete"]),
-            (Allow, RolePrincipal("hr"), ["create", "read", "edit"]),
-            (Allow, RolePrincipal("user"), ["read"]),
-            (Allow, Everyone, ["read"]),
-        ]

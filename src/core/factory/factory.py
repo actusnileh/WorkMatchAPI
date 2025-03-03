@@ -7,8 +7,14 @@ from app.controllers import (
     UserController,
     VacancyController,
 )
-from app.models import User, Vacancy
-from app.repositories import UserRepository, VacancyRepository
+from app.models import (
+    User,
+    Vacancy,
+)
+from app.repositories import (
+    UserRepository,
+    VacancyRepository,
+)
 from core.database import get_session
 
 
@@ -28,5 +34,5 @@ class Factory:
 
     def get_vacancy_controller(self, db_session=Depends(get_session)):
         return VacancyController(
-            vacancy_repository=self.vacancy_repository(db_session=db_session)
+            vacancy_repository=self.vacancy_repository(db_session=db_session),
         )

@@ -15,6 +15,7 @@ from core.exceptions import (
 )
 from core.security.jwt import JWTHandler
 from core.security.password import PasswordHandler
+from src.core.utils.datetime_util import utcnow
 
 
 class AuthController(BaseController[User]):
@@ -103,7 +104,10 @@ class AuthController(BaseController[User]):
             raise BadRequestException("Invalid credentials")
         updated_user = await self.user_repository._update(
             user,
-            attributes={"password": PasswordHandler.password_hash(new_password)},
+            attributes={
+                "password": PasswordHandler.password_hash(new_password),
+                "updated_at": utcnow(),
+            },
         )
 
         return updated_user

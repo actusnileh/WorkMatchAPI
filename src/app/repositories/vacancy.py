@@ -1,7 +1,8 @@
 from sqlalchemy import select
+
 from app.models import (
-    Vacancy,
     EmploymentType,
+    Vacancy,
 )
 from core.repository import BaseRepository
 
