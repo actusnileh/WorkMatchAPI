@@ -94,7 +94,10 @@ class AuthController(BaseController[User]):
         )
 
     async def update_password(
-        self, user: User, old_password: str, new_password: str
+        self,
+        user: User,
+        old_password: str,
+        new_password: str,
     ) -> Token:
         if not PasswordHandler.verify(user.password, old_password):
             raise BadRequestException("Invalid credentials")

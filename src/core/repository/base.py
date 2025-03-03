@@ -268,3 +268,21 @@ class BaseRepository(Generic[ModelType]):
         await self.session.commit()
         await self.session.refresh(model)
         return model
+
+    async def get_by_filters(
+        self,
+        join_: set[str] | None = None,
+        **filters: Any,
+    ) -> list[ModelType]:
+        """
+        Возвращает список объектов модели, соответствующих указанным фильтрам.
+
+        :param join_: Связи для выполнения JOIN.
+        :param filters: Словарь с фильтрами (поле=значение).
+        :return: Список объектов модели.
+        """
+        query = self._query(join_)
+        for field, value in filters.items():
+            query = query.where(getattr(self.model_class, field) == value)
+
+        return await self._all(query)
