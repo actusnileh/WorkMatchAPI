@@ -5,6 +5,8 @@ from pydantic import (
     UUID4,
 )
 
+from app.models import Vacancy
+
 
 class VacancyResponse(BaseModel):
     uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
@@ -27,3 +29,15 @@ class VacancyResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def from_orm(cls, vacancy: Vacancy):
+        return cls(
+            uuid=vacancy.uuid,
+            title=vacancy.title,
+            description=vacancy.description,
+            requirements=vacancy.requirements,
+            conditions=vacancy.conditions,
+            salary=vacancy.salary,
+            employment_type=vacancy.employment_type.name,
+        )

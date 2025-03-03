@@ -1,3 +1,10 @@
+from fastapi import (
+    HTTPException,
+    status,
+)
+
+from pydantic import UUID4
+
 from app.models import (
     User,
     Vacancy,
@@ -6,6 +13,7 @@ from app.repositories import VacancyRepository
 from core.controller import BaseController
 from core.database import Transactional
 from core.exceptions import BadRequestException
+from core.utils.datetime_util import utcnow
 
 
 class VacancyController(BaseController[Vacancy]):
@@ -50,3 +58,17 @@ class VacancyController(BaseController[Vacancy]):
                 "employment_type": employment_type,
             },
         )
+
+    @Transactional()
+    async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> User:
+        attrs["updated_at"] = utcnow()
+        vacancy: Vacancy = await self.vacancy_repository.get_by_uuid(uuid=uuid)
+        if not vacancy:
+            raise BadRequestException("По указанному UUID не найдена вакансия")
+        if user.o_id != vacancy.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Недостаточно прав для редактирования вакансии '{vacancy.title}'.",
+            )
+
+        return await self.vacancy_repository._update(vacancy, attrs)

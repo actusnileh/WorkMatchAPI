@@ -8,7 +8,10 @@ from app.models import (
     User,
     Vacancy,
 )
-from app.schemas.requests.vacancy import CreateVacancyRequest
+from app.schemas.requests.vacancy import (
+    CreateVacancyRequest,
+    EditVacancyRequest,
+)
 from app.schemas.responses.vacancy import VacancyResponse
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
@@ -42,27 +45,27 @@ async def create_vacancy(
         employment_type_str=create_vacancy_request.employment_type_str,
     )
 
-    return VacancyResponse(
-        uuid=vacancy.uuid,
-        title=vacancy.title,
-        description=vacancy.description,
-        requirements=vacancy.requirements,
-        conditions=vacancy.conditions,
-        salary=vacancy.salary,
-        employment_type=vacancy.employment_type.name,
-    )
+    return VacancyResponse.from_orm(vacancy)
 
 
 @vacancy_router.patch(
-    "/edit",
+    "/edit/{vacancy_uuid}",
     dependencies=[
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["hr", "admin"])),
     ],
-    status_code=201,
+    status_code=200,
 )
 async def edit_vacancy(
+    vacancy_uuid: str,
+    edit_vacancy_request: EditVacancyRequest,
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
-    return ""
+    vacancy: Vacancy = await vacancy_controller.update_by_uuid(
+        user=user,
+        uuid=vacancy_uuid,
+        attrs=edit_vacancy_request.model_dump(exclude_unset=True),
+    )
+
+    return VacancyResponse.from_orm(vacancy)

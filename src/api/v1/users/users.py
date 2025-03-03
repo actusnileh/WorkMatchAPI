@@ -15,7 +15,10 @@ from app.schemas.requests.users import (
     LoginUserRequest,
     RegisterUserRequest,
 )
-from app.schemas.responses.users import UserResponse
+from app.schemas.responses.users import (
+    RegisterUserResponse,
+    UserResponse,
+)
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -28,8 +31,8 @@ user_router = APIRouter()
 async def register_user(
     register_user_request: RegisterUserRequest,
     auth_controller: AuthController = Depends(Factory().get_auth_controller),
-) -> UserResponse:
-    return await auth_controller.register(
+) -> RegisterUserResponse:
+    user: User = await auth_controller.register(
         email=register_user_request.email,
         password=register_user_request.password,
         username=register_user_request.username,
@@ -37,6 +40,7 @@ async def register_user(
         role_str=register_user_request.role.value,
         employment_type_str=register_user_request.employment_type.value,
     )
+    return RegisterUserResponse.from_orm(user)
 
 
 @user_router.post("/login")
@@ -54,7 +58,7 @@ async def login_user(
 def get_user(
     user: User = Depends(get_current_user),
 ) -> UserResponse:
-    return UserResponse.from_orm_instance(user)
+    return UserResponse.from_orm(user)
 
 
 @user_router.patch("/edit", dependencies=[Depends(AuthenticationRequired)])
