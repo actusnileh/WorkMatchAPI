@@ -36,8 +36,9 @@ class VacancyController(BaseController[Vacancy]):
             employment_type_str,
         )
         if not employment_type:
-            raise BadRequestException(
-                "Указанный тип занятости не найден. Возможные значения: full-time, part-time",
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Указанный тип занятости не найден. Возможные значения: full-time, part-time.",
             )
         vacancy: Vacancy = await self.vacancy_repository.get_by_filters(
             title=title,

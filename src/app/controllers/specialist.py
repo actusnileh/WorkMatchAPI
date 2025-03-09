@@ -1,3 +1,9 @@
+from http.client import HTTPException
+
+from fastapi import status
+
+from pydantic import UUID4
+
 from app.models import (
     Specialist,
     User,
@@ -6,6 +12,7 @@ from app.repositories import SpecialistRepository
 from core.controller import BaseController
 from core.database import Transactional
 from src.core.exceptions.base import BadRequestException
+from src.core.utils.datetime_util import utcnow
 
 
 class SpecialistController(BaseController[Specialist]):
@@ -25,8 +32,9 @@ class SpecialistController(BaseController[Specialist]):
             employment_type_str,
         )
         if not employment_type:
-            raise BadRequestException(
-                "Указанный тип занятости не найден. Возможные значения: full-time, part-time",
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Указанный тип занятости не найден. Возможные значения: full-time, part-time.",
             )
 
         return await self.specialist_repository.create(
@@ -38,3 +46,17 @@ class SpecialistController(BaseController[Specialist]):
                 "employment_type_id": employment_type.o_id,
             },
         )
+
+    @Transactional()
+    async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> Specialist:
+        attrs["updated_at"] = utcnow()
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise BadRequestException("По указанному UUID не найдено резюме")
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для редактирования данного резюме.",
+            )
+
+        return await self.specialist_repository._update(specialist, attrs)

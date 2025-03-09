@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from app.models import (
     EmploymentType,
@@ -21,3 +22,12 @@ class SpecialistRepository(BaseRepository[Specialist]):
             return await self._all_unique(query)
 
         return await self._one_or_none(query)
+
+    async def get_by_uuid(self, uuid) -> Specialist:
+        query = (
+            select(Specialist)
+            .options(joinedload(Specialist.employment_type))
+            .filter(Specialist.uuid == uuid)
+        )
+        result = await self.session.execute(query)
+        return result.scalars().one_or_none()
