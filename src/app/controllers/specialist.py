@@ -60,3 +60,6 @@ class SpecialistController(BaseController[Specialist]):
             )
 
         return await self.specialist_repository._update(specialist, attrs)
+
+    async def add_skills(self, specialist: Specialist, skills: list[str]):
+        pass
