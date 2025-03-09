@@ -4,6 +4,7 @@ from sqlalchemy import (
     BigInteger,
     Column,
     ForeignKey,
+    Text,
     Unicode,
     UUID,
 )
@@ -22,9 +23,9 @@ class Specialist(Base, TimestampMixin):
         BigInteger,
         ForeignKey("users.o_id"),
         nullable=False,
-        unique=True,
     )
     full_name = Column(Unicode(255), nullable=False)
+    about_me = Column(Text)
     position = Column(Unicode(255))
     employment_type_id = Column(
         BigInteger,
@@ -32,8 +33,8 @@ class Specialist(Base, TimestampMixin):
         nullable=True,
     )
 
-    employment_type = relationship("EmploymentType", back_populates="vacancies")
-    creator = relationship("User", back_populates="vacancies")
+    employment_type = relationship("EmploymentType", back_populates="specialist")
+    creator = relationship("User", back_populates="specialist")
     skills = relationship("SpecialistSkill", back_populates="specialist")
     experiences = relationship("SpecialistExperience", back_populates="specialist")
 

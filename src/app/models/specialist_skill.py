@@ -15,6 +15,6 @@ class SpecialistSkill(Base):
     specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"), primary_key=True)
     skill_name = Column(String)
 
-    skill = relationship("Skill", back_populates="specialists")
+    specialist = relationship("Specialist", back_populates="skills")
 
     __mapper_args__ = {"eager_defaults": True}

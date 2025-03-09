@@ -14,6 +14,6 @@ class EmploymentType(Base):
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(Unicode(50), nullable=False, unique=True)
 
-    specialists = relationship("Specialist", back_populates="employment_type")
+    specialist = relationship("Specialist", back_populates="employment_type")
     vacancies = relationship("Vacancy", back_populates="employment_type")
     __mapper_args__ = {"eager_defaults": True}
