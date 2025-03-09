@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from .monitoring import monitoring_router
+from .specialists import specialists_router
 from .users import users_router
 from .vacancy import vacancies_router
 

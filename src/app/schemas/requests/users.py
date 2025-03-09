@@ -27,7 +27,6 @@ class RegisterUserRequest(BaseModel):
     username: constr(min_length=3, max_length=64)
     full_name: constr(min_length=3, max_length=64)
     role: RoleName
-    employment_type: EmploymentTypeName
 
     @field_validator("password")
     def password_must_contain_numbers(cls, v):

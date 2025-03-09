@@ -38,7 +38,6 @@ async def register_user(
         username=register_user_request.username,
         full_name=register_user_request.full_name,
         role_str=register_user_request.role.value,
-        employment_type_str=register_user_request.employment_type.value,
     )
     return RegisterUserResponse.from_orm(user)
 

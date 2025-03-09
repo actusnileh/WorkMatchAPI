@@ -25,14 +25,9 @@ class User(Base, TimestampMixin):
     full_name = Column(Unicode(255), nullable=False)
     is_active = Column(Boolean, default=True)
     role_id = Column(BigInteger, ForeignKey("roles.o_id"), nullable=True)
-    employment_type_id = Column(
-        BigInteger,
-        ForeignKey("employment_types.o_id"),
-        nullable=True,
-    )
 
     role = relationship("Role", back_populates="users")
-    employment_type = relationship("EmploymentType", back_populates="users")
     vacancies = relationship("Vacancy", back_populates="creator")
+    specialist = relationship("Specialist", back_populates="creator")
 
     __mapper_args__ = {"eager_defaults": True}
