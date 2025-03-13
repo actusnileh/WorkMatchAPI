@@ -8,8 +8,12 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from sqladmin import Admin
+
 from api import router
+from app.admin import UserAdmin
 from core.config import config
+from core.database.session import engines
 from core.exceptions import CustomException
 from core.fastapi.middlewares import (
     AuthBackend,
@@ -17,6 +21,7 @@ from core.fastapi.middlewares import (
     SQLAlchemyMiddleware,
     UserActionMiddleware,
 )
+from core.fastapi.middlewares.admin_auth import authentication_backend
 
 
 def on_auth_error(request: Request, exc: Exception):
@@ -75,6 +80,13 @@ def create_app() -> FastAPI:
     )
     init_routers(app_=app_)
     init_listeners(app_=app_)
+    admin = Admin(
+        app_,
+        engines["writer"],
+        authentication_backend=authentication_backend,
+    )
+    admin.add_view(UserAdmin)
+
     return app_
 
 

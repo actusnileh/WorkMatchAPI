@@ -31,3 +31,6 @@ class User(Base, TimestampMixin):
     specialist = relationship("Specialist", back_populates="creator")
 
     __mapper_args__ = {"eager_defaults": True}
+
+    def __str__(self):
+        return f"Пользователь #{self.username}"
