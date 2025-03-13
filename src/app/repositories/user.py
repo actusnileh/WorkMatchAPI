@@ -18,7 +18,7 @@ class UserRepository(BaseRepository[User]):
         query = query.filter(User.username == username)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._first(query)
 
         return await self._one_or_none(query)
 
@@ -31,7 +31,7 @@ class UserRepository(BaseRepository[User]):
         query = query.filter(User.email == email)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._first(query)
 
         return await self._one_or_none(query)
 
