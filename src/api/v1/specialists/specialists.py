@@ -9,10 +9,14 @@ from app.models import (
     User,
 )
 from app.schemas.requests.specialist import (
+    AddSkillSpecialistRequest,
     EditSpecialistRequest,
     SpecialistRequest,
 )
-from app.schemas.responses.specialist import SpecialistResponse
+from app.schemas.responses.specialist import (
+    SpecialistResponse,
+    SpecialistResponseWithSkills,
+)
 from core.factory.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -70,3 +74,53 @@ async def edit_specialist(
     )
 
     return SpecialistResponse.from_orm(specialsit)
+
+
+@specialist_router.post(
+    "/{specialist_uuid}/skill",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=200,
+)
+async def add_skill(
+    specialist_uuid: str,
+    add_skill_specialist_request: AddSkillSpecialistRequest,
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> SpecialistResponseWithSkills:
+    return SpecialistResponseWithSkills.from_orm(
+        await specialist_controller.add_skill(
+            user,
+            specialist_uuid,
+            add_skill_specialist_request.skill,
+        ),
+    )
+
+
+@specialist_router.delete(
+    "/{specialist_uuid}/skill/{skill}",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=200,
+)
+async def remove_skill(
+    specialist_uuid: str,
+    skill: str,
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> SpecialistResponseWithSkills:
+    return SpecialistResponseWithSkills.from_orm(
+        await specialist_controller.remove_skill(
+            user,
+            specialist_uuid,
+            skill,
+        ),
+    )

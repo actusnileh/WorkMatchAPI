@@ -12,7 +12,9 @@ from core.database import Base
 class SpecialistSkill(Base):
     __tablename__ = "specialist_skills"
 
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"), primary_key=True)
+    o_id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"))
     skill_name = Column(String)
 
     specialist = relationship("Specialist", back_populates="skills")
