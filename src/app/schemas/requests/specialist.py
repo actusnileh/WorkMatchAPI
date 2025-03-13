@@ -11,3 +11,7 @@ class EditSpecialistRequest(BaseModel):
     position: str | None = None
     about_me: str | None = None
     employment_type_str: str | None = None
+
+
+class AddSkillSpecialistRequest(BaseModel):
+    skill: str

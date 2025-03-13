@@ -1,8 +1,8 @@
-"""Initial
+"""empty message
 
-Revision ID: a4a8e1adf830
+Revision ID: 1ba5316e425d
 Revises:
-Create Date: 2025-03-09 14:35:12.455297
+Create Date: 2025-03-13 20:13:25.749724
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a4a8e1adf830"
+revision: str = "1ba5316e425d"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -45,13 +45,8 @@ def upgrade() -> None:
         sa.Column("full_name", sa.Unicode(length=255), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.Column("role_id", sa.BigInteger(), nullable=True),
-        sa.Column("employment_type_id", sa.BigInteger(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["employment_type_id"],
-            ["employment_types.o_id"],
-        ),
         sa.ForeignKeyConstraint(
             ["role_id"],
             ["roles.o_id"],
@@ -67,15 +62,20 @@ def upgrade() -> None:
         sa.Column("uuid", sa.UUID(), nullable=False),
         sa.Column("created_by", sa.BigInteger(), nullable=False),
         sa.Column("full_name", sa.Unicode(length=255), nullable=False),
+        sa.Column("about_me", sa.Text(), nullable=True),
         sa.Column("position", sa.Unicode(length=255), nullable=True),
+        sa.Column("employment_type_id", sa.BigInteger(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ["created_by"],
             ["users.o_id"],
         ),
+        sa.ForeignKeyConstraint(
+            ["employment_type_id"],
+            ["employment_types.o_id"],
+        ),
         sa.PrimaryKeyConstraint("o_id"),
-        sa.UniqueConstraint("created_by"),
         sa.UniqueConstraint("uuid"),
     )
     op.create_table(
@@ -151,12 +151,14 @@ def upgrade() -> None:
     )
     op.create_table(
         "specialist_skills",
-        sa.Column("specialist_id", sa.BigInteger(), nullable=False),
+        sa.Column("o_id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("specialist_id", sa.BigInteger(), nullable=True),
+        sa.Column("skill_name", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(
             ["specialist_id"],
             ["specialists.o_id"],
         ),
-        sa.PrimaryKeyConstraint("specialist_id"),
+        sa.PrimaryKeyConstraint("o_id"),
     )
     # ### end Alembic commands ###
     op.bulk_insert(

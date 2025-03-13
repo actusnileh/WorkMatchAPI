@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 from app.models import (
     EmploymentType,
     Specialist,
+    SpecialistSkill,
 )
 from core.repository import BaseRepository
 
@@ -26,8 +27,33 @@ class SpecialistRepository(BaseRepository[Specialist]):
     async def get_by_uuid(self, uuid) -> Specialist:
         query = (
             select(Specialist)
-            .options(joinedload(Specialist.employment_type))
+            .options(
+                joinedload(Specialist.skills),
+                joinedload(Specialist.employment_type),
+            )
             .filter(Specialist.uuid == uuid)
         )
         result = await self.session.execute(query)
-        return result.scalars().one_or_none()
+        return result.scalars().first()
+
+    async def add_skill(
+        self,
+        specialist: Specialist,
+        skill_name: str,
+    ) -> SpecialistSkill:
+        skill = SpecialistSkill(
+            specialist_id=specialist.o_id,
+            skill_name=skill_name,
+        )
+        self.session.add(skill)
+        await self.session.commit()
+
+        await self.session.refresh(specialist)
+
+        return specialist
+
+    async def remove_skill(self, skill, specialist: Specialist) -> Specialist:
+        await self.session.delete(skill)
+        await self.session.commit()
+        await self.session.refresh(specialist)
+        return specialist

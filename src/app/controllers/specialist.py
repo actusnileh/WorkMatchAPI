@@ -1,3 +1,4 @@
+import re
 from http.client import HTTPException
 
 from fastapi import status
@@ -61,5 +62,59 @@ class SpecialistController(BaseController[Specialist]):
 
         return await self.specialist_repository._update(specialist, attrs)
 
-    async def add_skills(self, specialist: Specialist, skills: list[str]):
-        pass
+    async def add_skill(self, user: User, uuid: UUID4, skill_name: str) -> Specialist:
+        normalized_skill_name = re.sub(r"\s+", " ", skill_name.strip().lower())
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise BadRequestException("По указанному UUID не найдено резюме")
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для редактирования данного резюме.",
+            )
+        existing_skill = next(
+            (
+                skill
+                for skill in specialist.skills
+                if skill.skill_name.lower() == normalized_skill_name
+            ),
+            None,
+        )
+        if existing_skill:
+            return specialist
+
+        return await self.specialist_repository.add_skill(
+            specialist,
+            normalized_skill_name,
+        )
+
+    async def remove_skill(
+        self,
+        user: User,
+        uuid: UUID4,
+        skill_name: str,
+    ) -> Specialist:
+        normalized_skill_name = re.sub(r"\s+", " ", skill_name.strip().lower())
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise BadRequestException("По указанному UUID не найдено резюме")
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для редактирования данного резюме.",
+            )
+        skill_to_remove = next(
+            (
+                skill
+                for skill in specialist.skills
+                if skill.skill_name.lower() == normalized_skill_name
+            ),
+            None,
+        )
+        if skill_to_remove:
+            return await self.specialist_repository.remove_skill(
+                skill_to_remove,
+                specialist,
+            )
+
+        return specialist
