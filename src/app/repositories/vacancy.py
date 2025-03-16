@@ -25,10 +25,6 @@ class VacancyRepository(BaseRepository[Vacancy]):
         return await self._one_or_none(query)
 
     async def get_by_uuid(self, uuid) -> Vacancy:
-        query = (
-            select(Vacancy)
-            .options(joinedload(Vacancy.employment_type))
-            .filter(Vacancy.uuid == uuid)
-        )
+        query = select(Vacancy).options(joinedload(Vacancy.employment_type)).filter(Vacancy.uuid == uuid)
         result = await self.session.execute(query)
         return result.scalars().one_or_none()

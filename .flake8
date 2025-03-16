@@ -1,3 +1,4 @@
 [flake8]
 exclude = __init__.py,env.py
 extend-ignore = A005
+max-line-length = 120

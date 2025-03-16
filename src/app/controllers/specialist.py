@@ -73,11 +73,7 @@ class SpecialistController(BaseController[Specialist]):
                 detail="Недостаточно прав для редактирования данного резюме.",
             )
         existing_skill = next(
-            (
-                skill
-                for skill in specialist.skills
-                if skill.skill_name.lower() == normalized_skill_name
-            ),
+            (skill for skill in specialist.skills if skill.skill_name.lower() == normalized_skill_name),
             None,
         )
         if existing_skill:
@@ -104,11 +100,7 @@ class SpecialistController(BaseController[Specialist]):
                 detail="Недостаточно прав для редактирования данного резюме.",
             )
         skill_to_remove = next(
-            (
-                skill
-                for skill in specialist.skills
-                if skill.skill_name.lower() == normalized_skill_name
-            ),
+            (skill for skill in specialist.skills if skill.skill_name.lower() == normalized_skill_name),
             None,
         )
         if skill_to_remove:
