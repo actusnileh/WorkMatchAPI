@@ -39,3 +39,6 @@ class Specialist(Base, TimestampMixin):
     experiences = relationship("SpecialistExperience", back_populates="specialist")
 
     __mapper_args__ = {"eager_defaults": True}
+
+    def __str__(self):
+        return f"{self.full_name}"

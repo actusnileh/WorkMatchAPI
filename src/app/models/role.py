@@ -14,3 +14,6 @@ class Role(Base):
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(Unicode(50), nullable=False, unique=True)
     users = relationship("User", back_populates="role")
+
+    def __str__(self):
+        return f"{self.name}"

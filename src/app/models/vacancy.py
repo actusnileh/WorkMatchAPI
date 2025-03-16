@@ -38,3 +38,6 @@ class Vacancy(Base, TimestampMixin):
     CheckConstraint("salary > 0", name="check_salary_positive")
 
     __mapper_args__ = {"eager_defaults": True}
+
+    def __str__(self):
+        return f"{self.title}"

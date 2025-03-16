@@ -11,7 +11,13 @@ from fastapi.responses import JSONResponse
 from sqladmin import Admin
 
 from api import router
-from app.admin import UserAdmin
+from app.admin import (
+    RoleAdmin,
+    SkillAdmin,
+    SpecialistAdmin,
+    UserAdmin,
+    VacancyAdmin,
+)
 from core.config import config
 from core.database.session import engines
 from core.exceptions import CustomException
@@ -86,6 +92,10 @@ def create_app() -> FastAPI:
         authentication_backend=authentication_backend,
     )
     admin.add_view(UserAdmin)
+    admin.add_view(VacancyAdmin)
+    admin.add_view(SpecialistAdmin)
+    admin.add_view(SkillAdmin)
+    admin.add_view(RoleAdmin)
 
     return app_
 

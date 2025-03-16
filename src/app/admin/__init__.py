@@ -1,12 +1,14 @@
-from sqladmin import ModelView
+from .role import RoleAdmin
+from .skill import SkillAdmin
+from .specialist import SpecialistAdmin
+from .user import UserAdmin
+from .vacancy import VacancyAdmin
 
-from app.models import User
 
-
-class UserAdmin(ModelView, model=User):
-    column_list = [User.o_id, User.username] + [User.role]
-    column_details_exclude_list = [User.password]
-    can_delete = False
-    name = "Пользователь"
-    name_plural = "Пользователи"
-    icon = "fa-solid fa-user"
+__all__ = [
+    "UserAdmin",
+    "VacancyAdmin",
+    "SpecialistAdmin",
+    "SkillAdmin",
+    "RoleAdmin",
+]

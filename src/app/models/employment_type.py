@@ -17,3 +17,6 @@ class EmploymentType(Base):
     specialist = relationship("Specialist", back_populates="employment_type")
     vacancies = relationship("Vacancy", back_populates="employment_type")
     __mapper_args__ = {"eager_defaults": True}
+
+    def __str__(self):
+        return f"{self.name}"

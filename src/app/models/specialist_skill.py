@@ -20,3 +20,6 @@ class SpecialistSkill(Base):
     specialist = relationship("Specialist", back_populates="skills")
 
     __mapper_args__ = {"eager_defaults": True}
+
+    def __str__(self):
+        return f"{self.skill_name}"
