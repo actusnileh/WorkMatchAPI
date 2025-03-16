@@ -11,4 +11,5 @@ __all__ = [
     "ResponseLoggerMiddleware",
     "AuthenticationMiddleware",
     "AuthBackend",
+    "UserActionMiddleware",
 ]

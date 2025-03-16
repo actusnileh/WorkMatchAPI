@@ -1,9 +1,12 @@
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.models import (
     EmploymentType,
     Specialist,
+    SpecialistExperience,
     SpecialistSkill,
 )
 from core.repository import BaseRepository
@@ -30,6 +33,7 @@ class SpecialistRepository(BaseRepository[Specialist]):
             .options(
                 joinedload(Specialist.skills),
                 joinedload(Specialist.employment_type),
+                joinedload(Specialist.experiences),
             )
             .filter(Specialist.uuid == uuid)
         )
@@ -54,6 +58,34 @@ class SpecialistRepository(BaseRepository[Specialist]):
 
     async def remove_skill(self, skill, specialist: Specialist) -> Specialist:
         await self.session.delete(skill)
+        await self.session.commit()
+        await self.session.refresh(specialist)
+        return specialist
+
+    async def add_experience(
+        self,
+        specialist: Specialist,
+        company_name: str,
+        position: str,
+        start_date: date,
+        end_date: date,
+    ) -> Specialist:
+        experience = SpecialistExperience(
+            specialist_id=specialist.o_id,
+            company_name=company_name,
+            position=position,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        self.session.add(experience)
+        await self.session.commit()
+
+        await self.session.refresh(specialist)
+
+        return specialist
+
+    async def remove_experience(self, experience, specialist: Specialist) -> Specialist:
+        await self.session.delete(experience)
         await self.session.commit()
         await self.session.refresh(specialist)
         return specialist

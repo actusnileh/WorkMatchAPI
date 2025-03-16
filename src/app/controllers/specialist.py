@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from http.client import HTTPException
 
 from fastapi import status
@@ -12,7 +13,6 @@ from app.models import (
 from app.repositories import SpecialistRepository
 from core.controller import BaseController
 from core.database import Transactional
-from src.core.exceptions.base import BadRequestException
 from src.core.utils.datetime_util import utcnow
 
 
@@ -53,7 +53,10 @@ class SpecialistController(BaseController[Specialist]):
         attrs["updated_at"] = utcnow()
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
         if not specialist:
-            raise BadRequestException("По указанному UUID не найдено резюме")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
         if user.o_id != specialist.created_by:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -66,7 +69,10 @@ class SpecialistController(BaseController[Specialist]):
         normalized_skill_name = re.sub(r"\s+", " ", skill_name.strip().lower())
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
         if not specialist:
-            raise BadRequestException("По указанному UUID не найдено резюме")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
         if user.o_id != specialist.created_by:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -93,7 +99,10 @@ class SpecialistController(BaseController[Specialist]):
         normalized_skill_name = re.sub(r"\s+", " ", skill_name.strip().lower())
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
         if not specialist:
-            raise BadRequestException("По указанному UUID не найдено резюме")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
         if user.o_id != specialist.created_by:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -110,3 +119,58 @@ class SpecialistController(BaseController[Specialist]):
             )
 
         return specialist
+
+    async def add_experience(
+        self,
+        user: User,
+        uuid: UUID4,
+        company_name: str,
+        position: str,
+        start_date: date,
+        end_date: date,
+    ) -> Specialist:
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для редактирования данного резюме.",
+            )
+
+        return await self.specialist_repository.add_experience(
+            specialist,
+            company_name,
+            position,
+            start_date,
+            end_date,
+        )
+
+    async def remove_experience(
+        self,
+        user: User,
+        uuid: UUID4,
+        experience_uuid: str,
+    ) -> Specialist:
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для редактирования данного резюме.",
+            )
+        experience_to_remove = next((exp for exp in specialist.experiences if str(exp.uuid) == experience_uuid), None)
+
+        if not experience_to_remove:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Опыт работы с указанным UUID не найден.",
+            )
+        return await self.specialist_repository.remove_experience(experience_to_remove, specialist)

@@ -9,13 +9,14 @@ from app.models import (
     User,
 )
 from app.schemas.requests.specialist import (
+    AddExperienceSpecialistRequest,
     AddSkillSpecialistRequest,
     EditSpecialistRequest,
     SpecialistRequest,
 )
 from app.schemas.responses.specialist import (
     SpecialistResponse,
-    SpecialistResponseWithSkills,
+    SpecialistResponseWithAdditional,
 )
 from core.factory.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
@@ -91,8 +92,8 @@ async def add_skill(
     specialist_controller: SpecialistController = Depends(
         Factory().get_specialist_controller,
     ),
-) -> SpecialistResponseWithSkills:
-    return SpecialistResponseWithSkills.from_orm(
+) -> SpecialistResponseWithAdditional:
+    return SpecialistResponseWithAdditional.from_orm(
         await specialist_controller.add_skill(
             user,
             specialist_uuid,
@@ -116,11 +117,64 @@ async def remove_skill(
     specialist_controller: SpecialistController = Depends(
         Factory().get_specialist_controller,
     ),
-) -> SpecialistResponseWithSkills:
-    return SpecialistResponseWithSkills.from_orm(
+) -> SpecialistResponseWithAdditional:
+    return SpecialistResponseWithAdditional.from_orm(
         await specialist_controller.remove_skill(
             user,
             specialist_uuid,
             skill,
+        ),
+    )
+
+
+@specialist_router.post(
+    "/{specialist_uuid}/experience",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=200,
+)
+async def add_experience(
+    specialist_uuid: str,
+    add_experience_specialist_request: AddExperienceSpecialistRequest,
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> SpecialistResponseWithAdditional:
+    return SpecialistResponseWithAdditional.from_orm(
+        await specialist_controller.add_experience(
+            user,
+            specialist_uuid,
+            add_experience_specialist_request.company_name,
+            add_experience_specialist_request.position,
+            add_experience_specialist_request.start_date,
+            add_experience_specialist_request.end_date,
+        ),
+    )
+
+
+@specialist_router.delete(
+    "/{specialist_uuid}/experience/{experience_uuid}",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=200,
+)
+async def remove_experience(
+    specialist_uuid: str,
+    experience_uuid: str,
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> SpecialistResponseWithAdditional:
+    return SpecialistResponseWithAdditional.from_orm(
+        await specialist_controller.remove_experience(
+            user,
+            specialist_uuid,
+            experience_uuid,
         ),
     )

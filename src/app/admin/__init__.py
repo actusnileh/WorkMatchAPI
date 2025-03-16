@@ -1,3 +1,4 @@
+from .experience import ExperienceAdmin
 from .role import RoleAdmin
 from .skill import SkillAdmin
 from .specialist import SpecialistAdmin
@@ -13,4 +14,5 @@ __all__ = [
     "SkillAdmin",
     "RoleAdmin",
     "UserActionAdmin",
+    "ExperienceAdmin",
 ]

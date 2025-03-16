@@ -12,6 +12,7 @@ from sqladmin import Admin
 
 from api import router
 from app.admin import (
+    ExperienceAdmin,
     RoleAdmin,
     SkillAdmin,
     SpecialistAdmin,
@@ -98,6 +99,7 @@ def create_app() -> FastAPI:
     admin.add_view(SkillAdmin)
     admin.add_view(RoleAdmin)
     admin.add_view(UserActionAdmin)
+    admin.add_view(ExperienceAdmin)
 
     return app_
 
