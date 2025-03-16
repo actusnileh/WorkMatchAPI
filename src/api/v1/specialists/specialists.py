@@ -52,6 +52,25 @@ async def create_specialist(
     return SpecialistResponse.from_orm(specialist)
 
 
+@specialist_router.get(
+    "/{specialist_uuid}",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=200,
+)
+async def get_specialist(
+    specialist_uuid: str,
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> SpecialistResponseWithAdditional:
+    specialist: Specialist = await specialist_controller.get_by_uuid(specialist_uuid)
+
+    return SpecialistResponseWithAdditional.from_orm(specialist)
+
+
 @specialist_router.patch(
     "/edit/{specialist_uuid}",
     dependencies=[

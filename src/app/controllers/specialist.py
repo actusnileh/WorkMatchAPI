@@ -1,8 +1,8 @@
 import re
 from datetime import date
-from http.client import HTTPException
 
 from fastapi import status
+from fastapi.exceptions import HTTPException
 
 from pydantic import UUID4
 
@@ -47,6 +47,15 @@ class SpecialistController(BaseController[Specialist]):
                 "employment_type_id": employment_type.o_id,
             },
         )
+
+    async def get_by_uuid(self, uuid: str) -> Specialist:
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
+        return specialist
 
     @Transactional()
     async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> Specialist:
