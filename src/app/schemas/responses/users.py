@@ -1,5 +1,6 @@
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     UUID4,
 )
@@ -14,8 +15,7 @@ class UserResponse(BaseModel):
     role: str = Field(..., example="user")
     uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, user: User) -> "UserResponse":
@@ -34,8 +34,7 @@ class RegisterUserResponse(BaseModel):
     full_name: str = Field(..., example="Петров Петр Петрович")
     uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, user: User) -> "UserResponse":

@@ -1,5 +1,6 @@
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     PositiveFloat,
     UUID4,
@@ -27,8 +28,7 @@ class VacancyResponse(BaseModel):
     salary: PositiveFloat = Field(..., example="65000")
     employment_type: str = Field(..., example="full-time")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, vacancy: Vacancy):

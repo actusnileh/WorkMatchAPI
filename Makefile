@@ -2,6 +2,8 @@ DC = docker compose
 APP_FILE = docker/app.yaml
 STORAGE_FILE = docker/storage.yaml
 ENV_FILE = --env-file .env
+EXEC = docker exec -it
+APP_CONTAINER = work_match_api
 
 .PHONY: build
 build:
@@ -18,3 +20,15 @@ logs-app:
 .PHONY: logs
 logs:
 	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} ${ENV_FILE}  logs -f
+
+.PHONY: alembic-upgrade
+alembic-upgrade:
+	${EXEC} ${APP_CONTAINER} alembic upgrade head
+
+.PHONY: alembic-downgrade
+alembic-downgrade:
+	${EXEC} ${APP_CONTAINER} alembic downgrade -1
+
+.PHONY: alembic-revision
+alembic-revision:
+	${EXEC} ${APP_CONTAINER} alembic revision --autogenerate

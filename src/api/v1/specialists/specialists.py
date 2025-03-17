@@ -60,7 +60,7 @@ async def create_specialist(
     ],
     status_code=200,
 )
-async def get_specialist(
+async def get_specialist_by_uuid(
     specialist_uuid: str,
     specialist_controller: SpecialistController = Depends(
         Factory().get_specialist_controller,

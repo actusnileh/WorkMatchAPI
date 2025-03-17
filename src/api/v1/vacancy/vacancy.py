@@ -16,7 +16,7 @@ from app.schemas.responses.vacancy import VacancyResponse
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
-from src.core.fastapi.dependencies.role_required import RoleRequired
+from core.fastapi.dependencies.role_required import RoleRequired
 
 
 vacancy_router = APIRouter()

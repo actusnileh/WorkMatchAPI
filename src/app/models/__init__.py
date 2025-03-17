@@ -1,6 +1,10 @@
 from core.database import Base
 
 from .analysis_result import AnalysisResult
+from .application import (
+    Application,
+    ApplicationStatus,
+)
 from .employment_type import EmploymentType
 from .role import Role
 from .specialist import Specialist

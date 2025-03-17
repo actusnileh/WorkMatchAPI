@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     UUID4,
 )
@@ -15,8 +16,7 @@ class SpecialistResponse(BaseModel):
     full_name: str = Field(..., example="Петров Пётр Петрович")
     position: str = Field(..., example="Junior")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, specialist: Specialist):
@@ -33,8 +33,7 @@ class ExperienceResponse(BaseModel):
     start_date: date
     end_date: Optional[date] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SpecialistResponseWithAdditional(BaseModel):
@@ -44,8 +43,7 @@ class SpecialistResponseWithAdditional(BaseModel):
     skills: list[str] = Field(..., example=["SQL", "Backend", "Frontend"])
     experiences: list[ExperienceResponse] = Field(..., description="List of work experiences")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, specialist: Specialist):

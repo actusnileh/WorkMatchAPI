@@ -14,7 +14,7 @@ from core.exceptions import (
 )
 from core.security.jwt import JWTHandler
 from core.security.password import PasswordHandler
-from src.core.utils.datetime_util import utcnow
+from core.utils.datetime_util import utcnow
 
 
 class AuthController(BaseController[User]):

@@ -1,5 +1,6 @@
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
 )
 
@@ -7,5 +8,4 @@ from pydantic import (
 class CurrentUser(BaseModel):
     o_id: int = Field(None, description="User ID")
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)

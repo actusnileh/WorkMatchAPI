@@ -34,6 +34,7 @@ class Vacancy(Base, TimestampMixin):
 
     creator = relationship("User", back_populates="vacancies")
     employment_type = relationship("EmploymentType", back_populates="vacancies")
+    applications = relationship("Application", back_populates="vacancy")
 
     CheckConstraint("salary > 0", name="check_salary_positive")
 

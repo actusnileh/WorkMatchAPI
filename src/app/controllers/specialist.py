@@ -13,7 +13,7 @@ from app.models import (
 from app.repositories import SpecialistRepository
 from core.controller import BaseController
 from core.database import Transactional
-from src.core.utils.datetime_util import utcnow
+from core.utils.datetime_util import utcnow
 
 
 class SpecialistController(BaseController[Specialist]):

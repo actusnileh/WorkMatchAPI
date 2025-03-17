@@ -3,9 +3,9 @@ from starlette.requests import Request
 
 from app.models.user import User
 from app.repositories.user import UserRepository
+from core.database.session import async_session_factory
 from core.security.jwt import JWTHandler
 from core.security.password import PasswordHandler
-from src.core.database.session import async_session_factory
 
 
 class AdminAuth(AuthenticationBackend):

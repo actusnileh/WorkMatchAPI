@@ -1,7 +1,7 @@
 from app.models import User
 from app.repositories import UserRepository
 from core.controller import BaseController
-from src.core.utils.datetime_util import utcnow
+from core.utils.datetime_util import utcnow
 
 
 class UserController(BaseController[User]):

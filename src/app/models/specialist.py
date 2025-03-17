@@ -37,6 +37,7 @@ class Specialist(Base, TimestampMixin):
     creator = relationship("User", back_populates="specialist")
     skills = relationship("SpecialistSkill", back_populates="specialist")
     experiences = relationship("SpecialistExperience", back_populates="specialist")
+    applications = relationship("Application", back_populates="specialist")
 
     __mapper_args__ = {"eager_defaults": True}
 

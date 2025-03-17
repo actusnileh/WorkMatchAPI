@@ -24,7 +24,7 @@ class User(Base, TimestampMixin):
     username = Column(Unicode(255), nullable=False, unique=True)
     full_name = Column(Unicode(255), nullable=False)
     is_active = Column(Boolean, default=True)
-    role_id = Column(BigInteger, ForeignKey("roles.o_id"), nullable=True)
+    role_id = Column(BigInteger, ForeignKey("roles.o_id"), nullable=False)
 
     role = relationship("Role", back_populates="users")
     vacancies = relationship("Vacancy", back_populates="creator")

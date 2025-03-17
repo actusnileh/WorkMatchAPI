@@ -8,8 +8,8 @@ from starlette.types import (
 
 from app.models import UserAction
 from app.schemas.extras.current_user import CurrentUser
+from core.database.session import async_session_factory
 from core.database.standalone_session import standalone_session
-from src.core.database.session import async_session_factory
 
 
 class UserActionMiddleware:

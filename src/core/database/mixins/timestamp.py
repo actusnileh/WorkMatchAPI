@@ -4,7 +4,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declared_attr
 
-from src.core.utils.datetime_util import utcnow
+from core.utils.datetime_util import utcnow
 
 
 class TimestampMixin:

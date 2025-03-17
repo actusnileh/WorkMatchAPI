@@ -1,5 +1,3 @@
-from functools import partial
-
 from fastapi import Depends
 
 from app.controllers import (
@@ -22,9 +20,17 @@ from core.database import get_session
 
 
 class Factory:
-    user_repository = partial(UserRepository, User)
-    specialist_repository = partial(SpecialistRepository, Specialist)
-    vacancy_repository = partial(VacancyRepository, Vacancy)
+    @staticmethod
+    def user_repository(db_session):
+        return UserRepository(User, db_session)
+
+    @staticmethod
+    def specialist_repository(db_session):
+        return SpecialistRepository(Specialist, db_session)
+
+    @staticmethod
+    def vacancy_repository(db_session):
+        return VacancyRepository(Vacancy, db_session)
 
     def get_user_controller(self, db_session=Depends(get_session)):
         return UserController(

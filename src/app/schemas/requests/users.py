@@ -16,11 +16,6 @@ class RoleName(str, Enum):
     HR = "hr"
 
 
-class EmploymentTypeName(str, Enum):
-    FULL_TIME = "full-time"
-    PART_TIME = "part-time"
-
-
 class RegisterUserRequest(BaseModel):
     email: EmailStr
     password: constr(min_length=8, max_length=64)

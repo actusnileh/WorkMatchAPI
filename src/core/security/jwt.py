@@ -30,7 +30,7 @@ class JWTHandler:
 
     @staticmethod
     def encode(payload: dict) -> str:
-        expire = datetime.utcnow() + timedelta(minutes=JWTHandler.expire_minutes)
+        expire = datetime.now().astimezone() + timedelta(minutes=JWTHandler.expire_minutes)
         payload.update({"exp": expire})
         return jwt.encode(
             payload,
