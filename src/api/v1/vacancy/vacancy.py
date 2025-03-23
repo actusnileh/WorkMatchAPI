@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -88,7 +90,7 @@ async def get_my_vacancies(
     status_code=200,
 )
 async def get_vacancy(
-    vacancy_uuid: str,
+    vacancy_uuid: UUID,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
     vacancy = await vacancy_controller.get_by_uuid(uuid=vacancy_uuid, join_={"employment_types"})
@@ -104,7 +106,7 @@ async def get_vacancy(
     status_code=200,
 )
 async def edit_vacancy(
-    vacancy_uuid: str,
+    vacancy_uuid: UUID,
     edit_vacancy_request: EditVacancyRequest,
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),

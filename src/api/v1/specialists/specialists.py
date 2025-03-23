@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -61,7 +63,7 @@ async def create_specialist(
     status_code=200,
 )
 async def get_specialist_by_uuid(
-    specialist_uuid: str,
+    specialist_uuid: UUID,
     specialist_controller: SpecialistController = Depends(
         Factory().get_specialist_controller,
     ),
@@ -97,7 +99,7 @@ async def get_my_specialists(
     status_code=200,
 )
 async def edit_specialist(
-    specialist_uuid: str,
+    specialist_uuid: UUID,
     edit_specialist_request: EditSpecialistRequest,
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(
@@ -122,7 +124,7 @@ async def edit_specialist(
     status_code=200,
 )
 async def add_skill(
-    specialist_uuid: str,
+    specialist_uuid: UUID,
     add_skill_specialist_request: AddSkillSpecialistRequest,
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(
@@ -147,7 +149,7 @@ async def add_skill(
     status_code=200,
 )
 async def remove_skill(
-    specialist_uuid: str,
+    specialist_uuid: UUID,
     skill: str,
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(
@@ -172,7 +174,7 @@ async def remove_skill(
     status_code=200,
 )
 async def add_experience(
-    specialist_uuid: str,
+    specialist_uuid: UUID,
     add_experience_specialist_request: AddExperienceSpecialistRequest,
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(
@@ -200,8 +202,8 @@ async def add_experience(
     status_code=200,
 )
 async def remove_experience(
-    specialist_uuid: str,
-    experience_uuid: str,
+    specialist_uuid: UUID,
+    experience_uuid: UUID,
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(
         Factory().get_specialist_controller,
@@ -214,3 +216,21 @@ async def remove_experience(
             experience_uuid,
         ),
     )
+
+
+@specialist_router.delete(
+    "/{specialist_uuid}",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["user", "admin"])),
+    ],
+    status_code=204,
+)
+async def delete_specialist(
+    specialist_uuid: UUID,
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(
+        Factory().get_specialist_controller,
+    ),
+) -> None:
+    await specialist_controller.delete_by_uuid(user, specialist_uuid)

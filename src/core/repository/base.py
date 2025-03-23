@@ -93,7 +93,9 @@ class BaseRepository(Generic[ModelType]):
         :param model: The model to delete.
         :return: None
         """
-        self.session.delete(model)
+        await self.session.delete(model)
+        await self.session.commit()
+        await self.session.flush()
 
     def _query(
         self,

@@ -1,0 +1,693 @@
+diff --git a/src/api/v1/specialists/specialists.py b/src/api/v1/specialists/specialists.py
+index b8b5656..efb8182 100644
+--- a/src/api/v1/specialists/specialists.py
++++ b/src/api/v1/specialists/specialists.py
+@@ -1,3 +1,5 @@
++from uuid import UUID
++
+ from fastapi import (
+     APIRouter,
+     Depends,
+@@ -61,7 +63,7 @@ async def create_specialist(
+     status_code=200,
+ )
+ async def get_specialist_by_uuid(
+-    specialist_uuid: str,
++    specialist_uuid: UUID,
+     specialist_controller: SpecialistController = Depends(
+         Factory().get_specialist_controller,
+     ),
+@@ -97,7 +99,7 @@ async def get_my_specialists(
+     status_code=200,
+ )
+ async def edit_specialist(
+-    specialist_uuid: str,
++    specialist_uuid: UUID,
+     edit_specialist_request: EditSpecialistRequest,
+     user: User = Depends(get_current_user),
+     specialist_controller: SpecialistController = Depends(
+@@ -122,7 +124,7 @@ async def edit_specialist(
+     status_code=200,
+ )
+ async def add_skill(
+-    specialist_uuid: str,
++    specialist_uuid: UUID,
+     add_skill_specialist_request: AddSkillSpecialistRequest,
+     user: User = Depends(get_current_user),
+     specialist_controller: SpecialistController = Depends(
+@@ -147,7 +149,7 @@ async def add_skill(
+     status_code=200,
+ )
+ async def remove_skill(
+-    specialist_uuid: str,
++    specialist_uuid: UUID,
+     skill: str,
+     user: User = Depends(get_current_user),
+     specialist_controller: SpecialistController = Depends(
+@@ -172,7 +174,7 @@ async def remove_skill(
+     status_code=200,
+ )
+ async def add_experience(
+-    specialist_uuid: str,
++    specialist_uuid: UUID,
+     add_experience_specialist_request: AddExperienceSpecialistRequest,
+     user: User = Depends(get_current_user),
+     specialist_controller: SpecialistController = Depends(
+@@ -200,8 +202,8 @@ async def add_experience(
+     status_code=200,
+ )
+ async def remove_experience(
+-    specialist_uuid: str,
+-    experience_uuid: str,
++    specialist_uuid: UUID,
++    experience_uuid: UUID,
+     user: User = Depends(get_current_user),
+     specialist_controller: SpecialistController = Depends(
+         Factory().get_specialist_controller,
+@@ -214,3 +216,21 @@ async def remove_experience(
+             experience_uuid,
+         ),
+     )
++
++
++@specialist_router.delete(
++    "/{specialist_uuid}",
++    dependencies=[
++        Depends(AuthenticationRequired),
++        Depends(RoleRequired(["user", "admin"])),
++    ],
++    status_code=204,
++)
++async def delete_specialist(
++    specialist_uuid: UUID,
++    user: User = Depends(get_current_user),
++    specialist_controller: SpecialistController = Depends(
++        Factory().get_specialist_controller,
++    ),
++) -> None:
++    await specialist_controller.delete_by_uuid(user, specialist_uuid)
+diff --git a/src/api/v1/vacancy/vacancy.py b/src/api/v1/vacancy/vacancy.py
+index 5387e85..b12c2bb 100644
+--- a/src/api/v1/vacancy/vacancy.py
++++ b/src/api/v1/vacancy/vacancy.py
+@@ -1,3 +1,5 @@
++from uuid import UUID
++
+ from fastapi import (
+     APIRouter,
+     Depends,
+@@ -88,7 +90,7 @@ async def get_my_vacancies(
+     status_code=200,
+ )
+ async def get_vacancy(
+-    vacancy_uuid: str,
++    vacancy_uuid: UUID,
+     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+ ) -> VacancyResponse:
+     vacancy = await vacancy_controller.get_by_uuid(uuid=vacancy_uuid, join_={"employment_types"})
+@@ -104,7 +106,7 @@ async def get_vacancy(
+     status_code=200,
+ )
+ async def edit_vacancy(
+-    vacancy_uuid: str,
++    vacancy_uuid: UUID,
+     edit_vacancy_request: EditVacancyRequest,
+     user: User = Depends(get_current_user),
+     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+diff --git a/src/app/controllers/specialist.py b/src/app/controllers/specialist.py
+index f6e775f..4d2b64e 100644
+--- a/src/app/controllers/specialist.py
++++ b/src/app/controllers/specialist.py
+@@ -1,5 +1,6 @@
+ import re
+ from datetime import date
++from uuid import UUID
+ 
+ from fastapi import status
+ from fastapi.exceptions import HTTPException
+@@ -126,8 +127,11 @@ class SpecialistController(BaseController[Specialist]):
+                 skill_to_remove,
+                 specialist,
+             )
+-
+-        return specialist
++        else:
++            raise HTTPException(
++                status_code=status.HTTP_404_NOT_FOUND,
++                detail="Не найдено ни одного навыка с указанным именем.",
++            )
+ 
+     async def add_experience(
+         self,
+@@ -162,7 +166,7 @@ class SpecialistController(BaseController[Specialist]):
+         self,
+         user: User,
+         uuid: UUID4,
+-        experience_uuid: str,
++        experience_uuid: UUID,
+     ) -> Specialist:
+         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+         if not specialist:
+@@ -175,7 +179,10 @@ class SpecialistController(BaseController[Specialist]):
+                 status_code=status.HTTP_403_FORBIDDEN,
+                 detail="Недостаточно прав для редактирования данного резюме.",
+             )
+-        experience_to_remove = next((exp for exp in specialist.experiences if str(exp.uuid) == experience_uuid), None)
++        experience_to_remove = next(
++            (exp for exp in specialist.experiences if str(exp.uuid) == str(experience_uuid)),
++            None,
++        )
+ 
+         if not experience_to_remove:
+             raise HTTPException(
+@@ -197,3 +204,17 @@ class SpecialistController(BaseController[Specialist]):
+                 detail="У вас нет резюме.",
+             )
+         return specialists
++
++    async def delete_by_uuid(self, user, uuid: str):
++        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
++        if not specialist:
++            raise HTTPException(
++                status_code=status.HTTP_404_NOT_FOUND,
++                detail="По указанному UUID не найдено резюме.",
++            )
++        if user.o_id != specialist.created_by:
++            raise HTTPException(
++                status_code=status.HTTP_403_FORBIDDEN,
++                detail="Недостаточно прав для удаления данного резюме.",
++            )
++        await self.specialist_repository.delete(specialist)
+diff --git a/src/app/schemas/responses/specialist.py b/src/app/schemas/responses/specialist.py
+index 4479c6a..1cba11d 100644
+--- a/src/app/schemas/responses/specialist.py
++++ b/src/app/schemas/responses/specialist.py
+@@ -1,5 +1,6 @@
+ from datetime import date
+ from typing import Optional
++from uuid import UUID
+ 
+ from pydantic import (
+     BaseModel,
+@@ -15,6 +16,7 @@ class SpecialistResponse(BaseModel):
+     uuid: UUID4 = Field(..., json_schema_extra={"example": "a3b8f042-1e16-4f0a-a8f0-421e16df0a2f"})
+     full_name: str = Field(..., json_schema_extra={"example": "Петров Пётр Петрович"})
+     position: str = Field(..., json_schema_extra={"example": "Junior"})
++    about_me: str = Field(..., json_schema_extra={"example": "Изучал джанго, фастапи ..."})
+ 
+     model_config = ConfigDict(from_attributes=True)
+ 
+@@ -23,11 +25,13 @@ class SpecialistResponse(BaseModel):
+         return cls(
+             uuid=specialist.uuid,
+             full_name=specialist.full_name,
++            about_me=specialist.about_me,
+             position=specialist.position,
+         )
+ 
+ 
+ class ExperienceResponse(BaseModel):
++    uuid: UUID
+     company_name: str
+     position: str
+     start_date: date
+@@ -42,6 +46,7 @@ class SpecialistResponseWithAdditional(BaseModel):
+     position: str = Field(..., json_schema_extra={"example": "Junior"})
+     skills: list[str] = Field(..., json_schema_extra={"example": ["SQL", "Backend", "Frontend"]})
+     experiences: list[ExperienceResponse] = Field(..., json_schema_extra={"example": "List of work experiences"})
++    about_me: str = Field(..., json_schema_extra={"example": "Изучал джанго, фастапи ..."})
+ 
+     model_config = ConfigDict(from_attributes=True)
+ 
+@@ -54,6 +59,7 @@ class SpecialistResponseWithAdditional(BaseModel):
+             skills=[skill.skill_name for skill in specialist.skills],
+             experiences=[
+                 ExperienceResponse(
++                    uuid=exp.uuid,
+                     company_name=exp.company_name,
+                     position=exp.position,
+                     start_date=exp.start_date,
+@@ -61,6 +67,7 @@ class SpecialistResponseWithAdditional(BaseModel):
+                 )
+                 for exp in specialist.experiences
+             ],
++            about_me=specialist.about_me,
+         )
+ 
+ 
+diff --git a/src/core/repository/base.py b/src/core/repository/base.py
+index 0d8a8e6..7a17824 100644
+--- a/src/core/repository/base.py
++++ b/src/core/repository/base.py
+@@ -93,7 +93,9 @@ class BaseRepository(Generic[ModelType]):
+         :param model: The model to delete.
+         :return: None
+         """
+-        self.session.delete(model)
++        await self.session.delete(model)
++        await self.session.commit()
++        await self.session.flush()
+ 
+     def _query(
+         self,
+diff --git a/src/tests/api/v1/specialists/test_specialists.py b/src/tests/api/v1/specialists/test_specialists.py
+new file mode 100644
+index 0000000..57132fc
+--- /dev/null
++++ b/src/tests/api/v1/specialists/test_specialists.py
+@@ -0,0 +1,362 @@
++import pytest
++from faker import Faker
++from httpx import AsyncClient
++
++from tests.utils.login import _create_user_and_login
++
++
++@pytest.mark.asyncio
++async def test_create_specialist(client: AsyncClient) -> None:
++    faker = Faker()
++    await _create_user_and_login(client)
++    specialist_json = {
++        "position": "junior",
++        "about_me": faker.text(max_nb_chars=160),
++        "employment_type_str": "full-time",
++    }
++
++    response = await client.post(
++        "/v1/specialist/",
++        json=specialist_json,
++    )
++
++    assert response.status_code == 201
++    assert response.json()["position"] == specialist_json["position"]
++    assert response.json()["about_me"] == specialist_json["about_me"]
++
++
++@pytest.mark.asyncio
++async def test_create_specialist_failed_with_employment_type(client: AsyncClient) -> None:
++    faker = Faker()
++    await _create_user_and_login(client)
++    specialist_json = {
++        "position": "junior",
++        "about_me": faker.text(max_nb_chars=160),
++        "employment_type_str": "asdasd",
++    }
++
++    response = await client.post(
++        "/v1/specialist/",
++        json=specialist_json,
++    )
++
++    assert response.status_code == 400
++
++
++@pytest.mark.asyncio
++async def test_get_specialist_by_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.get(
++        f"/v1/specialist/{specialist.json()['uuid']}",
++    )
++
++    assert response.status_code == 200
++    assert response.json()["position"] == "junior"
++    assert response.json()["about_me"] == "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
++
++
++@pytest.mark.asyncio
++async def test_get_specialist_by_uuid_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.get(
++        "/v1/specialist/invalid_uuid",
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_get_my_specialists(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.get(
++        "/v1/specialist/",
++    )
++
++    assert response.status_code == 200
++    assert len(response.json()["Specialists"]) > 0
++
++
++@pytest.mark.asyncio
++async def test_get_my_specialists_failed_without_authentication(client: AsyncClient) -> None:
++    response = await client.get(
++        "/v1/specialist/",
++    )
++
++    assert response.status_code == 401
++
++
++@pytest.mark.asyncio
++async def test_edit_specialist(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    edit_response = await client.patch(
++        f"/v1/specialist/edit/{specialist.json()['uuid']}",
++        json={
++            "position": "senior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel lobortis neque.",
++        },
++    )
++
++    assert edit_response.status_code == 200
++    assert edit_response.json()["position"] == "senior"
++
++
++@pytest.mark.asyncio
++async def test_edit_specialist_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.patch(
++        "/v1/specialist/edit/invalid_uuid",
++        json={
++            "position": "senior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel lobortis neque.",
++        },
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_delete_specialist(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.delete(
++        f"/v1/specialist/{specialist.json()['uuid']}",
++    )
++
++    assert response.status_code == 204
++
++
++@pytest.mark.asyncio
++async def test_delete_specialist_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.delete(
++        "/v1/specialist/invalid_uuid",
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_add_skill(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.post(
++        f"/v1/specialist/{specialist.json()['uuid']}/skill",
++        json={
++            "skill": "python",
++        },
++    )
++
++    assert response.status_code == 200
++    assert "python" in response.json()["skills"]
++
++
++@pytest.mark.asyncio
++async def test_add_skill_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.post(
++        "/v1/specialist/invalid_uuid/skill",
++        json={
++            "skill": "python",
++        },
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_delete_skill(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    await client.post(
++        f"/v1/specialist/{specialist.json()['uuid']}/skill",
++        json={
++            "skill": "python",
++        },
++    )
++
++    response = await client.delete(
++        f"/v1/specialist/{specialist.json()['uuid']}/skill/python",
++    )
++
++    assert response.status_code == 200
++
++
++@pytest.mark.asyncio
++async def test_delete_skill_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.delete(
++        "/v1/specialist/invalid_uuid/skill/python",
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_delete_skill_failed_with_nonexistent_skill(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.delete(
++        f"/v1/specialist/{specialist.json()['uuid']}/skill/java",
++    )
++
++    assert response.status_code == 404
++
++
++@pytest.mark.asyncio
++async def test_add_experience(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.post(
++        f"/v1/specialist/{specialist.json()['uuid']}/experience",
++        json={
++            "company_name": "ABC Corp",
++            "position": "Software Engineer",
++            "start_date": "2020-01-01",
++            "end_date": "2021-12-31",
++        },
++    )
++
++    assert response.status_code == 200
++    assert "ABC Corp" in response.json()["experiences"][0]["company_name"]
++
++
++@pytest.mark.asyncio
++async def test_add_experience_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.post(
++        "/v1/specialist/invalid_uuid/experience",
++        json={
++            "company_name": "ABC Corp",
++            "position": "Software Engineer",
++            "start_date": "2020-01-01",
++            "end_date": "2021-12-31",
++        },
++    )
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_delete_experience(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    experience = await client.post(
++        f"/v1/specialist/{specialist.json()['uuid']}/experience",
++        json={
++            "company_name": "ABC Corp",
++            "position": "Software Engineer",
++            "start_date": "2020-01-01",
++            "end_date": "2021-12-31",
++        },
++    )
++
++    experience_uuid = experience.json()["experiences"][0]["uuid"]
++
++    response = await client.delete(
++        f"/v1/specialist/{specialist.json()['uuid']}/experience/{experience_uuid}",
++    )
++
++    assert response.status_code == 200
++
++
++@pytest.mark.asyncio
++async def test_delete_experience_failed_with_invalid_uuid(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    response = await client.delete(
++        "/v1/specialist/invalid_uuid/experience/invalid_uuid",
++    )
++
++    assert response.status_code == 422
++
++
++@pytest.mark.asyncio
++async def test_delete_experience_failed_with_nonexistent_experience(client: AsyncClient) -> None:
++    await _create_user_and_login(client)
++    specialist = await client.post(
++        "/v1/specialist/",
++        json={
++            "position": "junior",
++            "about_me": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
++            "employment_type_str": "full-time",
++        },
++    )
++
++    response = await client.delete(
++        f"/v1/specialist/{specialist.json()['uuid']}/experience/invalid_uuid",
++    )
++
++    assert response.status_code == 422
+diff --git a/src/tests/factory/users.py b/src/tests/factory/users.py
+index 1c20570..ab62962 100644
+--- a/src/tests/factory/users.py
++++ b/src/tests/factory/users.py
+@@ -1,5 +1,3 @@
+-import random
+-
+ from faker import Faker
+ 
+ 
+@@ -11,11 +9,24 @@ def create_fake_user():
+     password = fake.password(length=12)
+     email = fake.email()
+     full_name = fake.name()
+-    role = random.choice(["hr", "user"])
+     return {
+         "email": email,
+         "password": password,
+         "username": username,
+         "full_name": full_name,
+-        "role": role,
++        "role": "user",
++    }
++
++
++def create_fake_hr():
++    username = fake.user_name()
++    password = fake.password(length=12)
++    email = fake.email()
++    full_name = fake.name()
++    return {
++        "email": email,
++        "password": password,
++        "username": username,
++        "full_name": full_name,
++        "role": "hr",
+     }
+diff --git a/src/tests/utils/login.py b/src/tests/utils/login.py
+index a136888..9f04ad5 100644
+--- a/src/tests/utils/login.py
++++ b/src/tests/utils/login.py
+@@ -2,7 +2,10 @@ from typing import Any
+ 
+ from httpx import AsyncClient
+ 
+-from tests.factory.users import create_fake_user
++from tests.factory.users import (
++    create_fake_hr,
++    create_fake_user,
++)
+ 
+ 
+ async def _create_user_and_login(
+@@ -19,4 +22,18 @@ async def _create_user_and_login(
+     return fake_user
+ 
+ 
+-__all__ = ["_create_user_and_login"]
++async def _create_hr_and_login(
++    client: AsyncClient,
++    fake_user=create_fake_hr(),
++) -> dict[str, Any]:
++    await client.post("/v1/users/", json=fake_user)
++
++    response = await client.post("/v1/users/login", json=fake_user)
++    access_token = response.json()["access_token"]
++
++    client.headers.update({"Authorization": f"Bearer {access_token}"})
++
++    return fake_user
++
++
++__all__ = ["_create_user_and_login", "_create_hr_and_login"]

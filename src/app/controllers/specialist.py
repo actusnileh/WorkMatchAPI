@@ -1,5 +1,6 @@
 import re
 from datetime import date
+from uuid import UUID
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
@@ -126,8 +127,11 @@ class SpecialistController(BaseController[Specialist]):
                 skill_to_remove,
                 specialist,
             )
-
-        return specialist
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Не найдено ни одного навыка с указанным именем.",
+            )
 
     async def add_experience(
         self,
@@ -162,7 +166,7 @@ class SpecialistController(BaseController[Specialist]):
         self,
         user: User,
         uuid: UUID4,
-        experience_uuid: str,
+        experience_uuid: UUID,
     ) -> Specialist:
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
         if not specialist:
@@ -175,7 +179,10 @@ class SpecialistController(BaseController[Specialist]):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Недостаточно прав для редактирования данного резюме.",
             )
-        experience_to_remove = next((exp for exp in specialist.experiences if str(exp.uuid) == experience_uuid), None)
+        experience_to_remove = next(
+            (exp for exp in specialist.experiences if str(exp.uuid) == str(experience_uuid)),
+            None,
+        )
 
         if not experience_to_remove:
             raise HTTPException(
@@ -197,3 +204,17 @@ class SpecialistController(BaseController[Specialist]):
                 detail="У вас нет резюме.",
             )
         return specialists
+
+    async def delete_by_uuid(self, user, uuid: str):
+        specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
+        if not specialist:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдено резюме.",
+            )
+        if user.o_id != specialist.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для удаления данного резюме.",
+            )
+        await self.specialist_repository.delete(specialist)
