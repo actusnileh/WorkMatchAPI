@@ -183,3 +183,17 @@ class SpecialistController(BaseController[Specialist]):
                 detail="Опыт работы с указанным UUID не найден.",
             )
         return await self.specialist_repository.remove_experience(experience_to_remove, specialist)
+
+    async def get_by_user(self, user: User):
+        specialists = await self.specialist_repository.get_by(
+            field="created_by",
+            value=user.o_id,
+            join_={"employment_types", "skills", "experience"},
+            unique=False,
+        )
+        if len(specialists) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="У вас нет резюме.",
+            )
+        return specialists

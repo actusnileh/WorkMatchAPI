@@ -15,6 +15,7 @@ from app.schemas.requests.specialist import (
     SpecialistRequest,
 )
 from app.schemas.responses.specialist import (
+    ListSpecialistResponseWithAdditional,
     SpecialistResponse,
     SpecialistResponseWithAdditional,
 )
@@ -56,7 +57,6 @@ async def create_specialist(
     "/{specialist_uuid}",
     dependencies=[
         Depends(AuthenticationRequired),
-        Depends(RoleRequired(["user", "admin"])),
     ],
     status_code=200,
 )
@@ -69,6 +69,23 @@ async def get_specialist_by_uuid(
     specialist: Specialist = await specialist_controller.get_by_uuid(specialist_uuid)
 
     return SpecialistResponseWithAdditional.from_orm(specialist)
+
+
+@specialist_router.get(
+    "/",
+    dependencies=[
+        Depends(AuthenticationRequired),
+    ],
+    status_code=200,
+)
+async def get_my_specialists(
+    user: User = Depends(get_current_user),
+    specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
+) -> ListSpecialistResponseWithAdditional:
+    specialists = await specialist_controller.get_by_user(user)
+    return ListSpecialistResponseWithAdditional(
+        Specialists=[SpecialistResponseWithAdditional.from_orm(s) for s in specialists],
+    )
 
 
 @specialist_router.patch(
