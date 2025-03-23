@@ -62,3 +62,7 @@ class SpecialistResponseWithAdditional(BaseModel):
                 for exp in specialist.experiences
             ],
         )
+
+
+class ListSpecialistResponseWithAdditional(BaseModel):
+    Specialists: list[SpecialistResponseWithAdditional]

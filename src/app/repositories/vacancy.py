@@ -1,5 +1,8 @@
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import (
+    contains_eager,
+    joinedload,
+)
 
 from app.models import (
     EmploymentType,
@@ -28,3 +31,6 @@ class VacancyRepository(BaseRepository[Vacancy]):
         query = select(Vacancy).options(joinedload(Vacancy.employment_type)).filter(Vacancy.uuid == uuid)
         result = await self.session.execute(query)
         return result.scalars().one_or_none()
+
+    def _join_employment_types(self, query):
+        return query.join(EmploymentType).options(contains_eager(Vacancy.employment_type))

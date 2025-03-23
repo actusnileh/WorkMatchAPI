@@ -1,7 +1,10 @@
 from datetime import date
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import (
+    contains_eager,
+    joinedload,
+)
 
 from app.models import (
     EmploymentType,
@@ -89,3 +92,12 @@ class SpecialistRepository(BaseRepository[Specialist]):
         await self.session.commit()
         await self.session.refresh(specialist)
         return specialist
+
+    def _join_employment_types(self, query):
+        return query.join(EmploymentType).options(contains_eager(Specialist.employment_type))
+
+    def _join_skills(self, query):
+        return query.join(SpecialistSkill, isouter=True).options(contains_eager(Specialist.skills))
+
+    def _join_experience(self, query):
+        return query.join(SpecialistExperience, isouter=True).options(contains_eager(Specialist.experiences))

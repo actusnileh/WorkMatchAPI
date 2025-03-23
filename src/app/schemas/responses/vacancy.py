@@ -41,3 +41,7 @@ class VacancyResponse(BaseModel):
             salary=vacancy.salary,
             employment_type=vacancy.employment_type.name,
         )
+
+
+class ListVacancyResponse(BaseModel):
+    Vacancies: list[VacancyResponse]

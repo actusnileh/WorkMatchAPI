@@ -60,6 +60,9 @@ class VacancyController(BaseController[Vacancy]):
             },
         )
 
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Vacancy]:
+        return await self.vacancy_repository.get_all(skip=skip, limit=limit, join_={"employment_types"})
+
     @Transactional()
     async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> User:
         attrs["updated_at"] = utcnow()
@@ -73,3 +76,17 @@ class VacancyController(BaseController[Vacancy]):
             )
 
         return await self.vacancy_repository._update(vacancy, attrs)
+
+    async def get_by_user(self, user: User):
+        vacancies = await self.vacancy_repository.get_by(
+            field="created_by",
+            value=user.o_id,
+            join_={"employment_types"},
+            unique=False,
+        )
+        if len(vacancies) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="У вас нет вакансий.",
+            )
+        return vacancies
