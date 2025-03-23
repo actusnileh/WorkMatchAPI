@@ -68,6 +68,18 @@ async def get_vacancies(
     )
 
 
+@vacancy_router.get(
+    "/{vacancy_uuid}/",
+    status_code=200,
+)
+async def get_vacancy(
+    vacancy_uuid: str,
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> VacancyResponse:
+    vacancy = await vacancy_controller.get_by_uuid(uuid=vacancy_uuid, join_={"employment_types"})
+    return VacancyResponse.from_orm(vacancy[0])
+
+
 @vacancy_router.patch(
     "/edit/{vacancy_uuid}",
     dependencies=[
