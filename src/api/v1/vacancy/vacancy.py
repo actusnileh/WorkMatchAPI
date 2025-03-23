@@ -12,7 +12,10 @@ from app.schemas.requests.vacancy import (
     CreateVacancyRequest,
     EditVacancyRequest,
 )
-from app.schemas.responses.vacancy import VacancyResponse
+from app.schemas.responses.vacancy import (
+    ListVacancyResponse,
+    VacancyResponse,
+)
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -46,6 +49,23 @@ async def create_vacancy(
     )
 
     return VacancyResponse.from_orm(vacancy)
+
+
+@vacancy_router.get(
+    "/",
+    status_code=200,
+)
+async def get_vacancies(
+    skip: int = 0,
+    limit: int = 50,
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> ListVacancyResponse:
+    vacancies = await vacancy_controller.get_all(skip, limit)
+    return ListVacancyResponse(
+        skip=skip,
+        limit=limit,
+        Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
+    )
 
 
 @vacancy_router.patch(

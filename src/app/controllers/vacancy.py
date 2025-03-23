@@ -60,6 +60,9 @@ class VacancyController(BaseController[Vacancy]):
             },
         )
 
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Vacancy]:
+        return await self.vacancy_repository.get_all(skip=skip, limit=limit, join_={"employment_types"})
+
     @Transactional()
     async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> User:
         attrs["updated_at"] = utcnow()
