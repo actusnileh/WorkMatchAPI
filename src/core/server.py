@@ -16,7 +16,6 @@ from app.admin import (
     RoleAdmin,
     SkillAdmin,
     SpecialistAdmin,
-    UserActionAdmin,
     UserAdmin,
     VacancyAdmin,
 )
@@ -27,7 +26,6 @@ from core.fastapi.middlewares import (
     AuthBackend,
     AuthenticationMiddleware,
     SQLAlchemyMiddleware,
-    UserActionMiddleware,
 )
 from core.fastapi.middlewares.admin_auth import authentication_backend
 
@@ -73,7 +71,6 @@ def make_middleware() -> List[Middleware]:
             on_error=on_auth_error,
         ),
         Middleware(SQLAlchemyMiddleware),
-        Middleware(UserActionMiddleware),
     ]
     return middleware
 
@@ -98,7 +95,6 @@ def create_app() -> FastAPI:
     admin.add_view(SpecialistAdmin)
     admin.add_view(SkillAdmin)
     admin.add_view(RoleAdmin)
-    admin.add_view(UserActionAdmin)
     admin.add_view(ExperienceAdmin)
 
     return app_

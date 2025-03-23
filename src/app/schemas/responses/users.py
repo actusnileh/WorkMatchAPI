@@ -9,11 +9,11 @@ from app.models import User
 
 
 class UserResponse(BaseModel):
-    email: str = Field(..., example="john.doe@example.com")
-    username: str = Field(..., example="john.doe")
-    full_name: str = Field(..., example="Петров Петр Петрович")
-    role: str = Field(..., example="user")
-    uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
+    email: str = Field(..., json_schema_extra={"example": "john.doe@example.com"})
+    username: str = Field(..., json_schema_extra={"example": "john.doe"})
+    full_name: str = Field(..., json_schema_extra={"example": "Петров Николай Петрович"})
+    role: str = Field(..., json_schema_extra={"example": "user"})
+    uuid: UUID4 = Field(..., json_schema_extra={"example": "a3b8f042-1e16-4f0a-a8f0-421e16df0a2f"})
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -29,10 +29,10 @@ class UserResponse(BaseModel):
 
 
 class RegisterUserResponse(BaseModel):
-    email: str = Field(..., example="john.doe@example.com")
-    username: str = Field(..., example="john.doe")
-    full_name: str = Field(..., example="Петров Петр Петрович")
-    uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
+    email: str = Field(..., json_schema_extra={"example": "john.doe@example.com"})
+    username: str = Field(..., json_schema_extra={"example": "john.doe"})
+    full_name: str = Field(..., json_schema_extra={"example": "Петров Николай Петрович"})
+    uuid: UUID4 = Field(..., json_schema_extra={"example": "a3b8f042-1e16-4f0a-a8f0-421e16df0a2f"})
 
     model_config = ConfigDict(from_attributes=True)
 

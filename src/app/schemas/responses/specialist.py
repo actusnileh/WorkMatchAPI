@@ -12,9 +12,9 @@ from app.models import Specialist
 
 
 class SpecialistResponse(BaseModel):
-    uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
-    full_name: str = Field(..., example="Петров Пётр Петрович")
-    position: str = Field(..., example="Junior")
+    uuid: UUID4 = Field(..., json_schema_extra={"example": "a3b8f042-1e16-4f0a-a8f0-421e16df0a2f"})
+    full_name: str = Field(..., json_schema_extra={"example": "Петров Пётр Петрович"})
+    position: str = Field(..., json_schema_extra={"example": "Junior"})
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,11 +37,11 @@ class ExperienceResponse(BaseModel):
 
 
 class SpecialistResponseWithAdditional(BaseModel):
-    uuid: UUID4 = Field(..., example="a3b8f042-1e16-4f0a-a8f0-421e16df0a2f")
-    full_name: str = Field(..., example="Петров Пётр Петрович")
-    position: str = Field(..., example="Junior")
-    skills: list[str] = Field(..., example=["SQL", "Backend", "Frontend"])
-    experiences: list[ExperienceResponse] = Field(..., description="List of work experiences")
+    uuid: UUID4 = Field(..., json_schema_extra={"example": "a3b8f042-1e16-4f0a-a8f0-421e16df0a2f"})
+    full_name: str = Field(..., json_schema_extra={"example": "Петров Пётр Петрович"})
+    position: str = Field(..., json_schema_extra={"example": "Junior"})
+    skills: list[str] = Field(..., json_schema_extra={"example": ["SQL", "Backend", "Frontend"]})
+    experiences: list[ExperienceResponse] = Field(..., json_schema_extra={"example": "List of work experiences"})
 
     model_config = ConfigDict(from_attributes=True)
 

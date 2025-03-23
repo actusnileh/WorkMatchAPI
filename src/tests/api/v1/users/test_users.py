@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.factory.users import create_fake_user
+from tests.utils.login import _create_user_and_login
 
 
 @pytest.mark.asyncio
@@ -140,17 +141,7 @@ async def test_edit_user_with_valid_changes(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_edit_user_password(client: AsyncClient) -> None:
-    fake_user = create_fake_user()
-
-    await client.post("/v1/users/", json=fake_user)
-
-    response = await client.post("/v1/users/login", json=fake_user)
-    print(fake_user, response)
-    assert response.status_code == 200
-    assert response.json()["access_token"] is not None
-    assert response.json()["refresh_token"] is not None
-
-    access_token = response.json()["access_token"]
+    fake_user = await _create_user_and_login(client)
 
     edit_json = {
         "old_password": fake_user["password"],
@@ -160,7 +151,6 @@ async def test_edit_user_password(client: AsyncClient) -> None:
     edit_response = await client.patch(
         "/v1/users/edit/password",
         json=edit_json,
-        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert edit_response.status_code == 200
@@ -168,17 +158,7 @@ async def test_edit_user_password(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_edit_user_password_with_invalid_password(client: AsyncClient) -> None:
-    fake_user = create_fake_user()
-
-    await client.post("/v1/users/", json=fake_user)
-
-    response = await client.post("/v1/users/login", json=fake_user)
-    print(fake_user, response)
-    assert response.status_code == 200
-    assert response.json()["access_token"] is not None
-    assert response.json()["refresh_token"] is not None
-
-    access_token = response.json()["access_token"]
+    await _create_user_and_login(client)
 
     edit_json = {
         "old_password": "123123123",
@@ -188,7 +168,6 @@ async def test_edit_user_password_with_invalid_password(client: AsyncClient) -> 
     edit_response = await client.patch(
         "/v1/users/edit/password",
         json=edit_json,
-        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert edit_response.status_code == 400

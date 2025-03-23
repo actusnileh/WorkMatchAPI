@@ -92,6 +92,7 @@ class AuthController(BaseController[User]):
     ) -> Token:
         if not PasswordHandler.verify(user.password, old_password):
             raise BadRequestException("Invalid credentials")
+
         updated_user = await self.user_repository._update(
             user,
             attributes={

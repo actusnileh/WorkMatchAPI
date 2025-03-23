@@ -1,5 +1,6 @@
 from enum import Enum
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -10,11 +11,7 @@ class EnvironmentType(str, Enum):
 
 
 class BaseConfig(BaseSettings):
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "allow"
+    model_config = ConfigDict(case_sensitive=True, env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
 class Config(BaseConfig):

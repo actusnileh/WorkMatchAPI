@@ -1,3 +1,5 @@
+from typing import Any
+
 from httpx import AsyncClient
 
 from tests.factory.users import create_fake_user
@@ -6,7 +8,7 @@ from tests.factory.users import create_fake_user
 async def _create_user_and_login(
     client: AsyncClient,
     fake_user=create_fake_user(),
-) -> None:
+) -> dict[str, Any]:
     await client.post("/v1/users/", json=fake_user)
 
     response = await client.post("/v1/users/login", json=fake_user)
@@ -14,7 +16,7 @@ async def _create_user_and_login(
 
     client.headers.update({"Authorization": f"Bearer {access_token}"})
 
-    return None
+    return fake_user
 
 
 __all__ = ["_create_user_and_login"]
