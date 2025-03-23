@@ -70,18 +70,18 @@ async def edit_user(
         user=user,
         attrs=edit_user_request.model_dump(exclude_unset=True),
     )
-    return UserResponse.from_orm_instance(updated_user)
+    return UserResponse.from_orm(updated_user)
 
 
-@user_router.patch("/edit_password", dependencies=[Depends(AuthenticationRequired)])
+@user_router.patch("/edit/password", dependencies=[Depends(AuthenticationRequired)])
 async def edit_user_password(
     edit_password_request: EditPasswordRequest,
     user: User = Depends(get_current_user),
     auth_controller: AuthController = Depends(Factory().get_auth_controller),
-):
+) -> UserResponse:
     updated_user = await auth_controller.update_password(
         user,
         edit_password_request.old_password,
         edit_password_request.new_password,
     )
-    return UserResponse.from_orm_instance(updated_user)
+    return UserResponse.from_orm(updated_user)
