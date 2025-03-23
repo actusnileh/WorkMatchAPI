@@ -90,3 +90,17 @@ class VacancyController(BaseController[Vacancy]):
                 detail="У вас нет вакансий.",
             )
         return vacancies
+
+    async def delete_by_uuid(self, user, uuid: str):
+        vacancy: Vacancy = await self.vacancy_repository.get_by_uuid(uuid=uuid)
+        if not vacancy:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="По указанному UUID не найдена вакансия.",
+            )
+        if user.o_id != vacancy.created_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав для удаления данной вакансии.",
+            )
+        await self.vacancy_repository.delete(vacancy)

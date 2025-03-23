@@ -86,7 +86,7 @@ async def get_my_vacancies(
 
 
 @vacancy_router.get(
-    "/{vacancy_uuid}/",
+    "/{vacancy_uuid}",
     status_code=200,
 )
 async def get_vacancy(
@@ -118,3 +118,19 @@ async def edit_vacancy(
     )
 
     return VacancyResponse.from_orm(vacancy)
+
+
+@vacancy_router.delete(
+    "/{vacancy_uuid}",
+    dependencies=[
+        Depends(AuthenticationRequired),
+        Depends(RoleRequired(["hr", "admin"])),
+    ],
+    status_code=204,
+)
+async def delete_specialist(
+    vacancy_uuid: UUID,
+    user: User = Depends(get_current_user),
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> None:
+    await vacancy_controller.delete_by_uuid(user, vacancy_uuid)
