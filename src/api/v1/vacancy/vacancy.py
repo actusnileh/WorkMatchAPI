@@ -62,8 +62,23 @@ async def get_vacancies(
 ) -> ListVacancyResponse:
     vacancies = await vacancy_controller.get_all(skip, limit)
     return ListVacancyResponse(
-        skip=skip,
-        limit=limit,
+        Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
+    )
+
+
+@vacancy_router.get(
+    "/get_my",
+    dependencies=[
+        Depends(AuthenticationRequired),
+    ],
+    status_code=200,
+)
+async def get_my_vacancies(
+    user: User = Depends(get_current_user),
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> ListVacancyResponse:
+    vacancies = await vacancy_controller.get_by_user(user)
+    return ListVacancyResponse(
         Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
     )
 

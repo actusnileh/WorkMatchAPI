@@ -76,3 +76,17 @@ class VacancyController(BaseController[Vacancy]):
             )
 
         return await self.vacancy_repository._update(vacancy, attrs)
+
+    async def get_by_user(self, user: User):
+        vacancies = await self.vacancy_repository.get_by(
+            field="created_by",
+            value=user.o_id,
+            join_={"employment_types"},
+            unique=False,
+        )
+        if len(vacancies) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="У вас нет вакансий.",
+            )
+        return vacancies

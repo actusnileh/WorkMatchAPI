@@ -44,6 +44,4 @@ class VacancyResponse(BaseModel):
 
 
 class ListVacancyResponse(BaseModel):
-    skip: int
-    limit: int
     Vacancies: list[VacancyResponse]
