@@ -15,8 +15,8 @@ class AnalysisResult(Base, TimestampMixin):
     __tablename__ = "analysis_results"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    vacancy_id = Column(BigInteger, ForeignKey("vacancies.o_id"), nullable=False)
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"), nullable=False)
+    vacancy_id = Column(BigInteger, ForeignKey("vacancies.o_id", ondelete="CASCADE"), nullable=False)
+    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id", ondelete="CASCADE"), nullable=False)
     match_percentage = Column(Numeric(5, 2), nullable=False)
     mismatches = Column(Text)
 

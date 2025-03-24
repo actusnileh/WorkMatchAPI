@@ -11,14 +11,15 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from core.database import Base
+from core.database.mixins import TimestampMixin
 
 
-class SpecialistExperience(Base):
+class SpecialistExperience(Base, TimestampMixin):
     __tablename__ = "specialist_experience"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
     uuid = Column(UUID(as_uuid=True), default=uuid4, unique=True, nullable=False)
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"), nullable=False)
+    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id", ondelete="CASCADE"), nullable=False)
     company_name = Column(Unicode(255))
     position = Column(Unicode(255))
     start_date = Column(Date)

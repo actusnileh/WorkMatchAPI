@@ -27,7 +27,7 @@ class Vacancy(Base, TimestampMixin):
     salary = Column(BigInteger, nullable=False)
     employment_type_id = Column(
         BigInteger,
-        ForeignKey("employment_types.o_id"),
+        ForeignKey("employment_types.o_id", ondelete="CASCADE"),
         nullable=True,
     )
     created_by = Column(BigInteger, ForeignKey("users.o_id"), nullable=False)
