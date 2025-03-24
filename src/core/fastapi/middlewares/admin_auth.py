@@ -4,7 +4,10 @@ from starlette.requests import Request
 from app.models.user import User
 from app.repositories.user import UserRepository
 from core.database.session import async_session_factory
-from core.security.jwt import JWTHandler
+from core.security.jwt import (
+    JWTExpiredError,
+    JWTHandler,
+)
 from core.security.password import PasswordHandler
 
 
@@ -42,8 +45,11 @@ class AdminAuth(AuthenticationBackend):
 
         if not token:
             return False
-
-        token = JWTHandler.decode(token)
+        try:
+            token = JWTHandler.decode(token)
+        except JWTExpiredError:
+            request.session.clear()
+            return False
         if token["role"] != "admin":
             return False
 

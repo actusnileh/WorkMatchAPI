@@ -37,6 +37,8 @@ class BaseRepository(Generic[ModelType]):
             attributes = {}
         model = self.model_class(**attributes)
         self.session.add(model)
+        await self.session.commit()  # Фиксация изменений в базе данных
+        await self.session.refresh(model)  # Обновление объекта с новыми данными из базы
         return model
 
     async def get_all(

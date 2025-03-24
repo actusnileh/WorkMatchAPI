@@ -1,17 +1,20 @@
 from fastapi import Depends
 
 from app.controllers import (
+    ApplicationController,
     AuthController,
     SpecialistController,
     UserController,
     VacancyController,
 )
 from app.models import (
+    Application,
     Specialist,
     User,
     Vacancy,
 )
 from app.repositories import (
+    ApplicationRepository,
     SpecialistRepository,
     UserRepository,
     VacancyRepository,
@@ -32,6 +35,10 @@ class Factory:
     def vacancy_repository(db_session):
         return VacancyRepository(Vacancy, db_session)
 
+    @staticmethod
+    def application_repository(db_session):
+        return ApplicationRepository(Application, db_session)
+
     def get_user_controller(self, db_session=Depends(get_session)):
         return UserController(
             user_repository=self.user_repository(db_session=db_session),
@@ -50,4 +57,11 @@ class Factory:
     def get_specialist_controller(self, db_session=Depends(get_session)):
         return SpecialistController(
             specialist_repository=self.specialist_repository(db_session=db_session),
+        )
+
+    def get_application_controller(self, db_session=Depends(get_session)):
+        return ApplicationController(
+            application_repository=self.application_repository(db_session),
+            specialist_repository=self.specialist_repository(db_session),
+            vacancy_repository=self.vacancy_repository(db_session),
         )

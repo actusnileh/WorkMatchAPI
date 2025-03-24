@@ -7,14 +7,15 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from core.database import Base
+from core.database.mixins import TimestampMixin
 
 
-class SpecialistSkill(Base):
+class SpecialistSkill(Base, TimestampMixin):
     __tablename__ = "specialist_skills"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
 
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"))
+    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id", ondelete="CASCADE"))
     skill_name = Column(String)
 
     specialist = relationship("Specialist", back_populates="skills")

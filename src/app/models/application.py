@@ -1,34 +1,40 @@
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     Column,
-    DateTime,
     ForeignKey,
-    Unicode,
+    UniqueConstraint,
+    UUID,
 )
 from sqlalchemy.orm import relationship
 
 from core.database import Base
-from core.utils import utcnow
+from core.database.mixins import TimestampMixin
 
 
-class ApplicationStatus(Base):
-    __tablename__ = "application_statuses"
-
-    o_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    name = Column(Unicode(50), nullable=False, unique=True)
-
-    applications = relationship("Application", back_populates="status")
-
-
-class Application(Base):
+class Application(Base, TimestampMixin):
     __tablename__ = "applications"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id"), nullable=False)
-    vacancy_id = Column(BigInteger, ForeignKey("vacancies.o_id"), nullable=False)
-    status_id = Column(BigInteger, ForeignKey("application_statuses.o_id"), nullable=False)
-    applied_at = Column(DateTime, default=utcnow, nullable=False)
+    specialist_uuid = Column(
+        UUID,
+        ForeignKey(
+            "specialists.uuid",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+    vacancy_uuid = Column(
+        UUID,
+        ForeignKey(
+            "vacancies.uuid",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+    applied = Column(Boolean, default=False, nullable=False)
 
     specialist = relationship("Specialist", back_populates="applications")
     vacancy = relationship("Vacancy", back_populates="applications")
-    status = relationship("ApplicationStatus", back_populates="applications")
+
+    __table_args__ = (UniqueConstraint("specialist_uuid", "vacancy_uuid", name="uq_specialist_vacancy"),)

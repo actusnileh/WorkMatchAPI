@@ -21,7 +21,7 @@ class Specialist(Base, TimestampMixin):
     uuid = Column(UUID(as_uuid=True), default=uuid4, unique=True, nullable=False)
     created_by = Column(
         BigInteger,
-        ForeignKey("users.o_id"),
+        ForeignKey("users.o_id", ondelete="CASCADE"),
         nullable=False,
     )
     full_name = Column(Unicode(255), nullable=False)
@@ -29,7 +29,7 @@ class Specialist(Base, TimestampMixin):
     position = Column(Unicode(255))
     employment_type_id = Column(
         BigInteger,
-        ForeignKey("employment_types.o_id"),
+        ForeignKey("employment_types.o_id", ondelete="CASCADE"),
         nullable=True,
     )
 
