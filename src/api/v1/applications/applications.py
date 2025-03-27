@@ -11,6 +11,7 @@ from app.schemas.responses.application import (
     ApplicationResponse,
     ListApplicationResponse,
 )
+from core.cache import Cache
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -21,6 +22,7 @@ application_router = APIRouter()
 
 
 @application_router.get("/specialist/{specialist_uuid}")
+@Cache.cached(prefix="application:specialist", ttl=60)
 async def get_all_applications_by_specialist(
     specialist_uuid: UUID,
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
@@ -30,6 +32,7 @@ async def get_all_applications_by_specialist(
 
 
 @application_router.get("/vacancy/{vacancy_uuid}")
+@Cache.cached(prefix="application:vacancy", ttl=60)
 async def get_all_applications_by_vacancy(
     vacancy_uuid: UUID,
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
@@ -53,6 +56,7 @@ async def application(
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
 ) -> ApplicationResponse:
     application = await application_controller.create(user, specialist_uuid, vacancy_uuid)
+
     return ApplicationResponse.from_orm(application)
 
 

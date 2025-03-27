@@ -27,6 +27,8 @@ pytest = "^8.3.5"
 pytest-asyncio = "^0.25.3"
 httpx = "<0.28"
 faker = "^37.0.0"
+redis = "^5.2.1"
+ujson = "^5.10.0"
 
 
 [tool.poetry.group.dev.dependencies]

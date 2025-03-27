@@ -1,11 +1,12 @@
 import pytest
+import pytest_asyncio
 from faker import Faker
 from httpx import AsyncClient
 
 from tests.utils.login import _create_hr_and_login, _create_user_and_login
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def create_vacancy(client: AsyncClient) -> None:
     fake = Faker()
     await _create_hr_and_login(client)
@@ -29,7 +30,7 @@ async def create_vacancy(client: AsyncClient) -> None:
     return response.json()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def create_specialist(client: AsyncClient) -> None:
     faker = Faker()
     await _create_user_and_login(client)
@@ -53,8 +54,8 @@ async def create_specialist(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_create_application(client: AsyncClient, create_vacancy, create_specialist) -> None:
-    vacancy = await create_vacancy
-    specialist = await create_specialist
+    vacancy = create_vacancy
+    specialist = create_specialist
     response = await client.post(
         f"/v1/applications/{specialist['uuid']}/{vacancy['uuid']}",
     )
@@ -65,8 +66,8 @@ async def test_create_application(client: AsyncClient, create_vacancy, create_sp
 
 @pytest.mark.asyncio
 async def test_get_applications(client: AsyncClient, create_vacancy, create_specialist) -> None:
-    vacancy = await create_vacancy
-    specialist = await create_specialist
+    vacancy = create_vacancy
+    specialist = create_specialist
     await client.post(
         f"/v1/applications/{specialist['uuid']}/{vacancy['uuid']}",
     )
@@ -82,8 +83,8 @@ async def test_get_applications(client: AsyncClient, create_vacancy, create_spec
 
 @pytest.mark.asyncio
 async def test_delete_application(client: AsyncClient, create_vacancy, create_specialist) -> None:
-    vacancy = await create_vacancy
-    specialist = await create_specialist
+    vacancy = create_vacancy
+    specialist = create_specialist
     await client.post(
         f"/v1/applications/{specialist['uuid']}/{vacancy['uuid']}",
     )

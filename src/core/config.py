@@ -18,6 +18,7 @@ class Config(BaseConfig):
     DEBUG: int = 0
     ENVIRONMENT: str = EnvironmentType.DEVELOPMENT
     POSTGRES_URL: str
+    REDIS_URL: str
     SECRET_KEY: str = "super-secret-key"
     JWT_ALGORITHM: str = "HS256"
     RELEASE_VERSION: str = "0.1"
