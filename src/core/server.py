@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import (
     FastAPI,
     Request,
@@ -18,6 +16,11 @@ from app.admin import (
     SpecialistAdmin,
     UserAdmin,
     VacancyAdmin,
+)
+from core.cache import (
+    Cache,
+    CustomKeyMaker,
+    RedisBackend,
 )
 from core.config import config
 from core.database.session import engines
@@ -56,7 +59,7 @@ def init_listeners(app_: FastAPI) -> None:
         )
 
 
-def make_middleware() -> List[Middleware]:
+def make_middleware() -> list[Middleware]:
     middleware = [
         Middleware(
             CORSMiddleware,
@@ -75,6 +78,10 @@ def make_middleware() -> List[Middleware]:
     return middleware
 
 
+def init_cache() -> None:
+    Cache.init(backend=RedisBackend(), key_maker=CustomKeyMaker())
+
+
 def create_app() -> FastAPI:
     app_ = FastAPI(
         title="WorkMatchAPI",
@@ -85,6 +92,8 @@ def create_app() -> FastAPI:
     )
     init_routers(app_=app_)
     init_listeners(app_=app_)
+    init_cache()
+
     admin = Admin(
         app_,
         engines["writer"],

@@ -18,6 +18,7 @@ from app.schemas.responses.vacancy import (
     ListVacancyResponse,
     VacancyResponse,
 )
+from core.cache import Cache
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -49,7 +50,9 @@ async def create_vacancy(
         created_by=user,
         employment_type_str=create_vacancy_request.employment_type_str,
     )
-
+    await Cache.remove_by_prefix("vacancy:all")
+    await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
+    await Cache.remove_by_prefix(f"vacancy:uuid:{vacancy[0].uuid}")
     return VacancyResponse.from_orm(vacancy[0])
 
 
@@ -57,6 +60,7 @@ async def create_vacancy(
     "/",
     status_code=200,
 )
+@Cache.cached(prefix="vacancy:all", ttl=60)
 async def get_vacancies(
     skip: int = 0,
     limit: int = 50,
@@ -70,11 +74,10 @@ async def get_vacancies(
 
 @vacancy_router.get(
     "/get_my",
-    dependencies=[
-        Depends(AuthenticationRequired),
-    ],
+    dependencies=[Depends(AuthenticationRequired)],
     status_code=200,
 )
+@Cache.cached(prefix="vacancy:me", ttl=60)
 async def get_my_vacancies(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
@@ -89,6 +92,7 @@ async def get_my_vacancies(
     "/{vacancy_uuid}",
     status_code=200,
 )
+@Cache.cached(prefix="vacancy:uuid", ttl=60)
 async def get_vacancy(
     vacancy_uuid: UUID,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
@@ -116,7 +120,9 @@ async def edit_vacancy(
         uuid=vacancy_uuid,
         attrs=edit_vacancy_request.model_dump(exclude_unset=True),
     )
-
+    await Cache.remove_by_prefix("vacancy:all")
+    await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
+    await Cache.remove_by_prefix(f"vacancy:uuid:{vacancy_uuid}")
     return VacancyResponse.from_orm(vacancy)
 
 
@@ -128,9 +134,12 @@ async def edit_vacancy(
     ],
     status_code=204,
 )
-async def delete_specialist(
+async def delete_vacancy(
     vacancy_uuid: UUID,
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> None:
     await vacancy_controller.delete_by_uuid(user, vacancy_uuid)
+    await Cache.remove_by_prefix("vacancy:all")
+    await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
+    await Cache.remove_by_prefix("vacancy:uuid")
