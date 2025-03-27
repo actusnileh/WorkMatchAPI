@@ -17,6 +17,11 @@ from app.admin import (
     UserAdmin,
     VacancyAdmin,
 )
+from core.cache import (
+    Cache,
+    CustomKeyMaker,
+    RedisBackend,
+)
 from core.config import config
 from core.database.session import engines
 from core.exceptions import CustomException
@@ -25,7 +30,6 @@ from core.fastapi.middlewares import (
     AuthenticationMiddleware,
     SQLAlchemyMiddleware,
 )
-from core.cache import Cache, CustomKeyMaker, RedisBackend
 from core.fastapi.middlewares.admin_auth import authentication_backend
 
 

@@ -1,3 +1,4 @@
+import asyncio
 from typing import (
     Any,
     Generator,
@@ -14,6 +15,16 @@ from httpx import (
 
 from core.factory.factory import get_session
 from core.server import create_app
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="session")

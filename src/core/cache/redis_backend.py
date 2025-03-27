@@ -7,6 +7,7 @@ import ujson
 from core.cache.base import BaseBackend
 from core.config import config
 
+
 redis = aioredis.from_url(url=config.REDIS_URL)
 
 
@@ -21,7 +22,7 @@ class RedisBackend(BaseBackend):
         except UnicodeDecodeError:
             return pickle.loads(result)
 
-    async def set(self, response: Any, key: str, ttl: int = 60) -> None:
+    async def set_cache(self, response: Any, key: str, ttl: int = 60) -> None:
         if isinstance(response, dict):
             response = ujson.dumps(response)
         elif isinstance(response, object):

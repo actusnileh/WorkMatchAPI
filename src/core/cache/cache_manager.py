@@ -1,7 +1,10 @@
 from functools import wraps
 from typing import Type
 
-from .base import BaseBackend, BaseKeyMaker
+from .base import (
+    BaseBackend,
+    BaseKeyMaker,
+)
 from .cache_tag import CacheTag
 
 
@@ -31,7 +34,7 @@ class CacheManager:
                     return cached_response
 
                 response = await function(*args, **kwargs)
-                await self.backend.set(response=response, key=key, ttl=ttl)
+                await self.backend.set_cache(response=response, key=key, ttl=ttl)
                 return response
 
             return __cached

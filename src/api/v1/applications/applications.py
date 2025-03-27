@@ -55,8 +55,10 @@ async def application(
     user: User = Depends(get_current_user),
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
 ) -> ApplicationResponse:
-    application = await application_controller.create(user, specialist_uuid, vacancy_uuid)
+    await Cache.remove_by_prefix(f"application:specialist:{specialist_uuid}")
+    await Cache.remove_by_prefix(f"application:vacancy:{vacancy_uuid}")
 
+    application = await application_controller.create(user, specialist_uuid, vacancy_uuid)
     return ApplicationResponse.from_orm(application)
 
 
@@ -88,4 +90,7 @@ async def delete_application(
     user: User = Depends(get_current_user),
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
 ) -> None:
+    await Cache.remove_by_prefix(f"application:specialist:{specialist_uuid}")
+    await Cache.remove_by_prefix(f"application:vacancy:{vacancy_uuid}")
+
     await application_controller.delete_by_specialist(user, specialist_uuid, vacancy_uuid)
