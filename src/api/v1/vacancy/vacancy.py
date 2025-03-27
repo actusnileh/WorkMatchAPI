@@ -50,7 +50,7 @@ async def create_vacancy(
         employment_type_str=create_vacancy_request.employment_type_str,
     )
 
-    return VacancyResponse.from_orm(vacancy)
+    return VacancyResponse.from_orm(vacancy[0])
 
 
 @vacancy_router.get(

@@ -43,12 +43,13 @@ class VacancyController(BaseController[Vacancy]):
         vacancy: Vacancy = await self.vacancy_repository.get_by_filters(
             title=title,
             description=description,
+            join_={"employment_types"},
         )
 
         if vacancy:
             raise BadRequestException("Такая вакансия уже существует")
 
-        return await self.vacancy_repository.create(
+        created_vacancy = await self.vacancy_repository.create(
             {
                 "title": title,
                 "description": description,
@@ -58,6 +59,13 @@ class VacancyController(BaseController[Vacancy]):
                 "created_by": created_by.o_id,
                 "employment_type": employment_type,
             },
+        )
+
+        return await self.vacancy_repository.get_by(
+            field="uuid",
+            value=created_vacancy.uuid,
+            join_={"employment_types"},
+            unique=True,
         )
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Vacancy]:

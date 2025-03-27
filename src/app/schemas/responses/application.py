@@ -22,3 +22,7 @@ class ApplicationResponse(BaseModel):
             specialist_uuid=application.specialist_uuid,
             vacancy_uuid=application.vacancy_uuid,
         )
+
+
+class ListApplicationResponse(BaseModel):
+    applications: list[ApplicationResponse]

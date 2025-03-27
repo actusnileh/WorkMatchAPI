@@ -27,7 +27,7 @@ class ApplicationController(BaseController[Application]):
         self.specialist_repository = specialist_repository
         self.vacancy_repository = vacancy_repository
 
-    async def create(self, user: User, specialist_uuid: str, vacancy_uuid: str):
+    async def create(self, user: User, specialist_uuid: str, vacancy_uuid: str) -> Application:
         specialist = await self.specialist_repository.get_by_uuid(specialist_uuid)
         if not specialist:
             raise HTTPException(
@@ -82,7 +82,7 @@ class ApplicationController(BaseController[Application]):
 
         await self.application_repository.delete(application)
 
-    async def get_by_specialist(self, specialist_uuid: str, vacancy_uuid: str):
+    async def get_by_specialist(self, specialist_uuid: str, vacancy_uuid: str) -> Application:
         application = await self.application_repository.get_by_specialist_vacancy(
             specialist_uuid,
             vacancy_uuid,
@@ -94,3 +94,17 @@ class ApplicationController(BaseController[Application]):
             )
 
         return application
+
+    async def get_all_by_specialist(self, specialist_uuid: str) -> list[Application]:
+        applications = await self.application_repository.get_by(
+            field="specialist_uuid",
+            value=specialist_uuid,
+        )
+        return applications
+
+    async def get_all_by_vacancy(self, vacancy_uuid: str) -> list[Application]:
+        applications = await self.application_repository.get_by(
+            field="vacancy_uuid",
+            value=vacancy_uuid,
+        )
+        return applications
