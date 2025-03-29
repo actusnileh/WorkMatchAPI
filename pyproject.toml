@@ -29,6 +29,8 @@ httpx = "<0.28"
 faker = "^37.0.0"
 redis = "^5.2.1"
 ujson = "^5.10.0"
+elasticsearch = "^8.17.2"
+aiohttp = "^3.11.14"
 
 
 [tool.poetry.group.dev.dependencies]

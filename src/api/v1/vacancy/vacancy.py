@@ -72,6 +72,19 @@ async def get_vacancies(
     )
 
 
+@vacancy_router.get("/search", status_code=200)
+async def search_vacancies(
+    query: str,
+    skip: int = 0,
+    limit: int = 10,
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> ListVacancyResponse:
+    vacancies = await vacancy_controller.search_vacancies(query=query, skip=skip, limit=limit)
+    return ListVacancyResponse(
+        Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
+    )
+
+
 @vacancy_router.get(
     "/get_my",
     dependencies=[Depends(AuthenticationRequired)],

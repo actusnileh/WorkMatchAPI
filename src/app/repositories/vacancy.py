@@ -34,3 +34,7 @@ class VacancyRepository(BaseRepository[Vacancy]):
 
     def _join_employment_types(self, query):
         return query.join(EmploymentType).options(contains_eager(Vacancy.employment_type))
+
+    async def get_employment_type_by_id(self, employment_type_id: int) -> EmploymentType:
+        result = await self.session.execute(select(EmploymentType).filter(EmploymentType.o_id == employment_type_id))
+        return result.scalars().first()
