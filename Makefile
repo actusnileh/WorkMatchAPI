@@ -15,7 +15,7 @@ drop-all:
 
 .PHONY: logs-app
 logs-app:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} ${ENV_FILE}  logs -f
+	${DC} -f ${APP_FILE} ${ENV_FILE}  logs -f
 
 .PHONY: logs
 logs:

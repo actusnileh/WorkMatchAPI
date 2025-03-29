@@ -24,9 +24,35 @@ services:
             - work_match_api
         restart: unless-stopped
 
+    elasticsearch:
+        image: elasticsearch:8.16.6
+        container_name: work_match_api_elasticsearch
+        environment:
+            - discovery.type=single-node
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
+            - xpack.security.enabled=false
+        ports:
+            - 9200:9200
+        volumes:
+            - work_match_api_elastic:/usr/share/elasticsearch/data
+        networks:
+            - work_match_api
+    kibana:
+        image: kibana:8.16.6
+        container_name: work_match_api_kibana
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        ports:
+            - 5601:5601
+        depends_on:
+            - elasticsearch
+        networks:
+            - work_match_api
+
 volumes:
     work_match_api_postgres:
     work_match_api_redis:
+    work_match_api_elastic:
 
 networks:
     work_match_api:

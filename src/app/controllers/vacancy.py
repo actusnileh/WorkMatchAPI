@@ -12,6 +12,7 @@ from app.models import (
 from app.repositories import VacancyRepository
 from core.controller import BaseController
 from core.database import Transactional
+from core.elasticsearch import es_client
 from core.exceptions import BadRequestException
 from core.utils.datetime_util import utcnow
 
@@ -61,12 +62,16 @@ class VacancyController(BaseController[Vacancy]):
             },
         )
 
-        return await self.vacancy_repository.get_by(
+        created_vacancy = await self.vacancy_repository.get_by(
             field="uuid",
             value=created_vacancy.uuid,
             join_={"employment_types"},
             unique=True,
         )
+
+        await self.index_vacancy(created_vacancy)
+
+        return created_vacancy
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Vacancy]:
         return await self.vacancy_repository.get_all(skip=skip, limit=limit, join_={"employment_types"})
@@ -83,7 +88,11 @@ class VacancyController(BaseController[Vacancy]):
                 detail=f"Недостаточно прав для редактирования вакансии '{vacancy.title}'.",
             )
 
-        return await self.vacancy_repository._update(vacancy, attrs)
+        updated_vacancy = await self.vacancy_repository._update(vacancy, attrs)
+
+        await self.index_vacancy(updated_vacancy)
+
+        return updated_vacancy
 
     async def get_by_user(self, user: User):
         vacancies = await self.vacancy_repository.get_by(
@@ -112,3 +121,49 @@ class VacancyController(BaseController[Vacancy]):
                 detail="Недостаточно прав для удаления данной вакансии.",
             )
         await self.vacancy_repository.delete(vacancy)
+
+        await self.delete_vacancy_from_index(vacancy.id)
+
+    async def search_vacancies(self, query: str, skip: int = 0, limit: int = 10) -> list[Vacancy]:
+        body = {
+            "query": {
+                "multi_match": {"query": query, "fields": ["title", "description", "requirements", "conditions"]},
+            },
+            "from": skip,
+            "size": limit,
+        }
+        response = await es_client.search(index="vacancies", body=body)
+        hits = response["hits"]["hits"]
+
+        vacancies = [Vacancy(**hit["_source"]) for hit in hits]
+
+        for vacancy in vacancies:
+            if vacancy.employment_type_id:
+                vacancy.employment_type = await self.vacancy_repository.get_employment_type_by_id(
+                    vacancy.employment_type_id,
+                )
+
+        return vacancies
+
+    async def index_vacancy(self, vacancy: Vacancy) -> None:
+        """
+        Индексация вакансии в Elasticsearch.
+        """
+        vacancy = vacancy[0]
+        document = {
+            "o_id": vacancy.o_id,
+            "uuid": str(vacancy.uuid),
+            "title": vacancy.title,
+            "description": vacancy.description,
+            "requirements": vacancy.requirements,
+            "conditions": vacancy.conditions,
+            "salary": vacancy.salary,
+            "employment_type_id": vacancy.employment_type_id,
+        }
+        await es_client.index(index="vacancies", id=vacancy.o_id, document=document)
+
+    async def delete_vacancy_from_index(self, vacancy_id: int) -> None:
+        """
+        Удаление вакансии из индекса Elasticsearch.
+        """
+        await es_client.delete(index="vacancies", id=vacancy_id)
