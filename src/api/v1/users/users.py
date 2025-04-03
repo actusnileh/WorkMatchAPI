@@ -23,9 +23,16 @@ from core.cache import Cache
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
+from worker import add
 
 
 user_router = APIRouter()
+
+
+@user_router.post("/test/", status_code=201)
+async def add_task(x: int, y: int):
+    task = add.delay(x, y)  # Отправляем задачу в Celery
+    return {"task_id": task.id}
 
 
 @user_router.post("/", status_code=201)
