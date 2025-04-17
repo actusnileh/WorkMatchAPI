@@ -1,4 +1,6 @@
 from typing import Any
+from app.schemas.responses.specialist import SpecialistResponseWithAdditional
+from app.schemas.responses.vacancy import VacancyResponse
 from src.worker import celery_app
 import httpx
 
@@ -20,7 +22,16 @@ client = httpx.Client(
     max_retries=5,
 )
 def apply_neural_network(self, vacancy, specialist) -> dict[str, Any]:
-    print(vacancy, specialist)
-    # resp = client.post("/", json=vacancy)
-    # resp.raise_for_status()
-    # return resp.json()
+    specialist_schema = (SpecialistResponseWithAdditional.from_orm(specialist)).model_dump(
+        mode="json", exclude_none=True, exclude_unset=True
+    )
+    vacancy_schema = (VacancyResponse.from_orm(vacancy)).model_dump(mode="json", exclude_none=True, exclude_unset=True)
+    resp = client.post(
+        url="/vacancy_match",
+        json={
+            "job": vacancy_schema,
+            "resume": specialist_schema,
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()
