@@ -13,6 +13,7 @@ from app.repositories import ApplicationRepository
 from app.repositories.specialist import SpecialistRepository
 from app.repositories.vacancy import VacancyRepository
 from core.controller import BaseController
+from worker.tasks.neural_network import apply_neural_network
 
 
 class ApplicationController(BaseController[Application]):
@@ -60,6 +61,8 @@ class ApplicationController(BaseController[Application]):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Заявка на данную вакансию уже существует.",
             )
+        else:
+            apply_neural_network(vacancy, specialist)
 
         return application
 

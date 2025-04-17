@@ -25,7 +25,7 @@ class Config(BaseConfig):
     ELASTICSEARCH_URL: str
 
     CELERY_BROKER_URL: str
-    CELERY_BACKEND_URL: str
+    NEURAL_SERVICE_URL: str = "localhost:8000"
 
     SECRET_KEY: str = "super-secret-key"
     JWT_ALGORITHM: str = "HS256"

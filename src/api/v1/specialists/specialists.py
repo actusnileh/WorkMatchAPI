@@ -34,6 +34,7 @@ specialist_router = APIRouter()
 @specialist_router.get(
     "/{specialist_uuid}",
     dependencies=[Depends(AuthenticationRequired)],
+    summary="Получить информацию о специалисте",
     status_code=200,
 )
 @Cache.cached(prefix="specialist:uuid", ttl=60)
@@ -41,6 +42,9 @@ async def get_specialist_by_uuid(
     specialist_uuid: UUID,
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponseWithAdditional:
+    """
+    Возвращает информацию о специалисте по его UUID.
+    """
     specialist: Specialist = await specialist_controller.get_by_uuid(specialist_uuid)
     return SpecialistResponseWithAdditional.from_orm(specialist)
 
@@ -48,6 +52,7 @@ async def get_specialist_by_uuid(
 @specialist_router.get(
     "/",
     dependencies=[Depends(AuthenticationRequired)],
+    summary="Получить специалистов текущего пользователя",
     status_code=200,
 )
 @Cache.cached(prefix="specialist:user", ttl=60)
@@ -55,6 +60,9 @@ async def get_my_specialists(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> ListSpecialistResponseWithAdditional:
+    """
+    Возвращает список специалистов, связанных с текущим пользователем.
+    """
     specialists = await specialist_controller.get_by_user(user)
     return ListSpecialistResponseWithAdditional(
         Specialists=[SpecialistResponseWithAdditional.from_orm(s) for s in specialists],
@@ -67,6 +75,7 @@ async def get_my_specialists(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Создать нового специалиста",
     status_code=201,
 )
 async def create_specialist(
@@ -74,6 +83,9 @@ async def create_specialist(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponse:
+    """
+    Создает нового специалиста, связанного с текущим пользователем.
+    """
     specialist: Specialist = await specialist_controller.create_specialist(
         created_by=user,
         position=create_specialist_request.position,
@@ -90,6 +102,7 @@ async def create_specialist(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Редактировать информацию о специалисте",
     status_code=200,
 )
 async def edit_specialist(
@@ -98,6 +111,9 @@ async def edit_specialist(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponse:
+    """
+    Редактирует информацию о специалисте по его UUID.
+    """
     specialist: Specialist = await specialist_controller.update_by_uuid(
         user=user,
         uuid=specialist_uuid,
@@ -114,6 +130,7 @@ async def edit_specialist(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Добавить навык специалисту",
     status_code=200,
 )
 async def add_skill(
@@ -122,6 +139,9 @@ async def add_skill(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponseWithAdditional:
+    """
+    Добавляет новый навык специалисту.
+    """
     response = await specialist_controller.add_skill(
         user,
         specialist_uuid,
@@ -138,6 +158,7 @@ async def add_skill(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Удалить навык специалиста",
     status_code=200,
 )
 async def remove_skill(
@@ -146,6 +167,9 @@ async def remove_skill(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponseWithAdditional:
+    """
+    Удаляет навык у специалиста.
+    """
     response = await specialist_controller.remove_skill(
         user,
         specialist_uuid,
@@ -162,6 +186,7 @@ async def remove_skill(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Добавить опыт работы специалисту",
     status_code=200,
 )
 async def add_experience(
@@ -170,6 +195,9 @@ async def add_experience(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponseWithAdditional:
+    """
+    Добавляет новый опыт работы специалисту.
+    """
     response = await specialist_controller.add_experience(
         user,
         specialist_uuid,
@@ -189,6 +217,7 @@ async def add_experience(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Удалить опыт работы специалиста",
     status_code=200,
 )
 async def remove_experience(
@@ -197,6 +226,9 @@ async def remove_experience(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> SpecialistResponseWithAdditional:
+    """
+    Удаляет указанный опыт работы у специалиста.
+    """
     response = await specialist_controller.remove_experience(
         user,
         specialist_uuid,
@@ -213,6 +245,7 @@ async def remove_experience(
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["user", "admin"])),
     ],
+    summary="Удалить специалиста",
     status_code=204,
 )
 async def delete_specialist(
@@ -220,6 +253,9 @@ async def delete_specialist(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
 ) -> None:
+    """
+    Удаляет специалиста по его UUID.
+    """
     await specialist_controller.delete_by_uuid(user, specialist_uuid)
     await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
     await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")

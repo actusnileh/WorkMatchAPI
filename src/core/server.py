@@ -14,6 +14,7 @@ from app.admin import (
     RoleAdmin,
     SkillAdmin,
     SpecialistAdmin,
+    ApplicationAdmin,
     UserAdmin,
     VacancyAdmin,
 )
@@ -105,7 +106,7 @@ def create_app() -> FastAPI:
     admin.add_view(SkillAdmin)
     admin.add_view(RoleAdmin)
     admin.add_view(ExperienceAdmin)
-
+    admin.add_view(ApplicationAdmin)
     return app_
 
 
