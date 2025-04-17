@@ -1,4 +1,6 @@
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import (
+    UUID,
     BigInteger,
     Column,
     ForeignKey,
@@ -15,10 +17,10 @@ class AnalysisResult(Base, TimestampMixin):
     __tablename__ = "analysis_results"
 
     o_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    vacancy_id = Column(BigInteger, ForeignKey("vacancies.o_id", ondelete="CASCADE"), nullable=False)
-    specialist_id = Column(BigInteger, ForeignKey("specialists.o_id", ondelete="CASCADE"), nullable=False)
+    vacancy_id = Column(UUID, ForeignKey("vacancies.uuid", ondelete="CASCADE"), nullable=False)
+    specialist_id = Column(UUID, ForeignKey("specialists.uuid", ondelete="CASCADE"), nullable=False)
     match_percentage = Column(Numeric(5, 2), nullable=False)
-    mismatches = Column(Text)
+    mismatches = Column(ARRAY(Text))
 
     vacancy = relationship("Vacancy")
     specialist = relationship("Specialist")

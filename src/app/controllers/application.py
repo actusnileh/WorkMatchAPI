@@ -12,8 +12,10 @@ from app.models import (
 from app.repositories import ApplicationRepository
 from app.repositories.specialist import SpecialistRepository
 from app.repositories.vacancy import VacancyRepository
+from app.schemas.responses.specialist import SpecialistResponseWithAdditional
+from app.schemas.responses.vacancy import VacancyResponse
 from core.controller import BaseController
-from worker.tasks.neural_network import apply_neural_network
+from worker.worker import apply_neural_network
 
 
 class ApplicationController(BaseController[Application]):
@@ -62,7 +64,11 @@ class ApplicationController(BaseController[Application]):
                 detail="Заявка на данную вакансию уже существует.",
             )
         else:
-            apply_neural_network(vacancy, specialist)
+            vacancy_schema = VacancyResponse.from_orm(vacancy)
+            specialist_schema = SpecialistResponseWithAdditional.from_orm(specialist)
+            vacancy_json = vacancy_schema.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+            specialst_json = specialist_schema.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+            apply_neural_network.apply_async((vacancy_json, specialst_json))
 
         return application
 
