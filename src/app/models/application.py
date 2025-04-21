@@ -38,3 +38,6 @@ class Application(Base, TimestampMixin):
     vacancy = relationship("Vacancy", back_populates="applications")
 
     __table_args__ = (UniqueConstraint("specialist_uuid", "vacancy_uuid", name="uq_specialist_vacancy"),)
+
+    def __str__(self):
+        return f"Отклик - {self.o_id}"

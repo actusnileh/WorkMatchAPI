@@ -35,6 +35,7 @@ class Vacancy(Base, TimestampMixin):
     creator = relationship("User", back_populates="vacancies")
     employment_type = relationship("EmploymentType", back_populates="vacancies")
     applications = relationship("Application", back_populates="vacancy")
+    analysis_results = relationship("AnalysisResult", back_populates="vacancy", cascade="all, delete-orphan")
 
     CheckConstraint("salary > 0", name="check_salary_positive")
 

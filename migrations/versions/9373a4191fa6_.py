@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 3d5dfbed1a9a
+Revision ID: 9373a4191fa6
 Revises:
-Create Date: 2025-03-24 19:52:29.179809
+Create Date: 2025-04-21 17:45:02.174728
 
 """
 
@@ -10,10 +10,10 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = "3d5dfbed1a9a"
+revision: str = "9373a4191fa6"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -67,14 +67,8 @@ def upgrade() -> None:
         sa.Column("employment_type_id", sa.BigInteger(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["created_by"],
-            ["users.o_id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["employment_type_id"],
-            ["employment_types.o_id"],
-        ),
+        sa.ForeignKeyConstraint(["created_by"], ["users.o_id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["employment_type_id"], ["employment_types.o_id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
         sa.UniqueConstraint("uuid"),
     )
@@ -95,30 +89,21 @@ def upgrade() -> None:
             ["created_by"],
             ["users.o_id"],
         ),
-        sa.ForeignKeyConstraint(
-            ["employment_type_id"],
-            ["employment_types.o_id"],
-        ),
+        sa.ForeignKeyConstraint(["employment_type_id"], ["employment_types.o_id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
         sa.UniqueConstraint("uuid"),
     )
     op.create_table(
         "analysis_results",
         sa.Column("o_id", sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.Column("vacancy_id", sa.BigInteger(), nullable=False),
-        sa.Column("specialist_id", sa.BigInteger(), nullable=False),
+        sa.Column("vacancy_uuid", sa.UUID(), nullable=False),
+        sa.Column("specialist_uuid", sa.UUID(), nullable=False),
         sa.Column("match_percentage", sa.Numeric(precision=5, scale=2), nullable=False),
-        sa.Column("mismatches", sa.Text(), nullable=True),
+        sa.Column("mismatches", postgresql.ARRAY(sa.Text()), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["specialist_id"],
-            ["specialists.o_id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["vacancy_id"],
-            ["vacancies.o_id"],
-        ),
+        sa.ForeignKeyConstraint(["specialist_uuid"], ["specialists.uuid"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["vacancy_uuid"], ["vacancies.uuid"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
     )
     op.create_table(
@@ -129,15 +114,10 @@ def upgrade() -> None:
         sa.Column("applied", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["specialist_uuid"],
-            ["specialists.uuid"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["vacancy_uuid"],
-            ["vacancies.uuid"],
-        ),
+        sa.ForeignKeyConstraint(["specialist_uuid"], ["specialists.uuid"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["vacancy_uuid"], ["vacancies.uuid"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
+        sa.UniqueConstraint("specialist_uuid", "vacancy_uuid", name="uq_specialist_vacancy"),
     )
     op.create_table(
         "specialist_experience",
@@ -150,10 +130,7 @@ def upgrade() -> None:
         sa.Column("end_date", sa.Date(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["specialist_id"],
-            ["specialists.o_id"],
-        ),
+        sa.ForeignKeyConstraint(["specialist_id"], ["specialists.o_id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
         sa.UniqueConstraint("uuid"),
     )
@@ -164,34 +141,10 @@ def upgrade() -> None:
         sa.Column("skill_name", sa.String(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["specialist_id"],
-            ["specialists.o_id"],
-        ),
+        sa.ForeignKeyConstraint(["specialist_id"], ["specialists.o_id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("o_id"),
     )
     # ### end Alembic commands ###
-    op.bulk_insert(
-        sa.table(
-            "roles",
-            sa.column("name", sa.String),
-        ),
-        [
-            {"name": "hr"},
-            {"name": "admin"},
-            {"name": "user"},
-        ],
-    )
-    op.bulk_insert(
-        sa.table(
-            "employment_types",
-            sa.column("name", sa.String),
-        ),
-        [
-            {"name": "full-time"},
-            {"name": "part-time"},
-        ],
-    )
 
 
 def downgrade() -> None:
@@ -206,5 +159,3 @@ def downgrade() -> None:
     op.drop_table("roles")
     op.drop_table("employment_types")
     # ### end Alembic commands ###
-    op.execute("DELETE FROM roles WHERE name IN ('HR', 'ADMIN', 'USER')")
-    op.execute("DELETE FROM employment_types WHERE name IN ('full-time', 'part-time')")

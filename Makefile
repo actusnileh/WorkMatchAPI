@@ -1,17 +1,19 @@
 DC = docker compose
 APP_FILE = docker/app.yaml
 STORAGE_FILE = docker/storage.yaml
+BROKER_FILE = docker/broker.yaml
+
 ENV_FILE = --env-file .env
 EXEC = docker exec -it
 APP_CONTAINER = work_match_api
 
 .PHONY: build
 build:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} ${ENV_FILE} up --build -d
+	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE} up --build -d
 
 .PHONY: drop-all
 drop-all:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} ${ENV_FILE}  down
+	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE}  down
 
 .PHONY: logs-app
 logs-app:
@@ -19,7 +21,7 @@ logs-app:
 
 .PHONY: logs
 logs:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} ${ENV_FILE}  logs -f
+	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE}  logs -f
 
 .PHONY: alembic-upgrade
 alembic-upgrade:

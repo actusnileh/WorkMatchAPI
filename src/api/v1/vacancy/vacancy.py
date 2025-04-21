@@ -30,6 +30,7 @@ vacancy_router = APIRouter()
 
 @vacancy_router.post(
     "/",
+    summary="Создать новую вакансию",
     dependencies=[
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["hr", "admin"])),
@@ -41,6 +42,9 @@ async def create_vacancy(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
+    """
+    Создает новую вакансию для HR или администратора.
+    """
     vacancy: Vacancy = await vacancy_controller.create_vacancy(
         title=create_vacancy_request.title,
         description=create_vacancy_request.description,
@@ -58,6 +62,7 @@ async def create_vacancy(
 
 @vacancy_router.get(
     "/",
+    summary="Получить список вакансий",
     status_code=200,
 )
 @Cache.cached(prefix="vacancy:all", ttl=60)
@@ -66,19 +71,29 @@ async def get_vacancies(
     limit: int = 50,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> ListVacancyResponse:
+    """
+    Возвращает список всех вакансий с пагинацией.
+    """
     vacancies = await vacancy_controller.get_all(skip, limit)
     return ListVacancyResponse(
         Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
     )
 
 
-@vacancy_router.get("/search", status_code=200)
+@vacancy_router.get(
+    "/search",
+    summary="Найти вакансии",
+    status_code=200,
+)
 async def search_vacancies(
     query: str,
     skip: int = 0,
     limit: int = 10,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> ListVacancyResponse:
+    """
+    Выполняет поиск вакансий по ключевым словам.
+    """
     vacancies = await vacancy_controller.search_vacancies(query=query, skip=skip, limit=limit)
     return ListVacancyResponse(
         Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
@@ -87,6 +102,7 @@ async def search_vacancies(
 
 @vacancy_router.get(
     "/get_my",
+    summary="Получить мои вакансии",
     dependencies=[Depends(AuthenticationRequired)],
     status_code=200,
 )
@@ -95,6 +111,9 @@ async def get_my_vacancies(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> ListVacancyResponse:
+    """
+    Возвращает список вакансий, созданных текущим пользователем.
+    """
     vacancies = await vacancy_controller.get_by_user(user)
     return ListVacancyResponse(
         Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
@@ -103,6 +122,7 @@ async def get_my_vacancies(
 
 @vacancy_router.get(
     "/{vacancy_uuid}",
+    summary="Получить вакансию по UUID",
     status_code=200,
 )
 @Cache.cached(prefix="vacancy:uuid", ttl=60)
@@ -110,12 +130,16 @@ async def get_vacancy(
     vacancy_uuid: UUID,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
+    """
+    Возвращает информацию о вакансии по ее UUID.
+    """
     vacancy = await vacancy_controller.get_by_uuid(uuid=vacancy_uuid, join_={"employment_types"})
     return VacancyResponse.from_orm(vacancy[0])
 
 
 @vacancy_router.patch(
     "/edit/{vacancy_uuid}",
+    summary="Редактировать вакансию",
     dependencies=[
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["hr", "admin"])),
@@ -128,6 +152,9 @@ async def edit_vacancy(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> VacancyResponse:
+    """
+    Редактирует вакансию, указанную по UUID.
+    """
     vacancy: Vacancy = await vacancy_controller.update_by_uuid(
         user=user,
         uuid=vacancy_uuid,
@@ -141,6 +168,7 @@ async def edit_vacancy(
 
 @vacancy_router.delete(
     "/{vacancy_uuid}",
+    summary="Удалить вакансию",
     dependencies=[
         Depends(AuthenticationRequired),
         Depends(RoleRequired(["hr", "admin"])),
@@ -152,6 +180,9 @@ async def delete_vacancy(
     user: User = Depends(get_current_user),
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
 ) -> None:
+    """
+    Удаляет вакансию, указанную по UUID.
+    """
     await vacancy_controller.delete_by_uuid(user, vacancy_uuid)
     await Cache.remove_by_prefix("vacancy:all")
     await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")

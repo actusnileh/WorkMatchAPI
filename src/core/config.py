@@ -17,9 +17,16 @@ class BaseConfig(BaseSettings):
 class Config(BaseConfig):
     DEBUG: int = 0
     ENVIRONMENT: str = EnvironmentType.DEVELOPMENT
+
     POSTGRES_URL: str
+
     REDIS_URL: str
+
     ELASTICSEARCH_URL: str
+
+    CELERY_BROKER_URL: str
+    NEURAL_SERVICE_URL: str = "http://192.168.1.55:8001"
+
     SECRET_KEY: str = "super-secret-key"
     JWT_ALGORITHM: str = "HS256"
     RELEASE_VERSION: str = "0.1"
