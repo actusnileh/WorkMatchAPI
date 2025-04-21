@@ -29,12 +29,6 @@ class RegisterUserRequest(BaseModel):
             raise ValueError("Password must contain numbers")
         return v
 
-    @field_validator("username")
-    def username_must_not_contain_special_characters(cls, v):
-        if re.search(r"[^a-zA-Z0-9]", v):
-            raise ValueError("Username must not contain special characters")
-        return v
-
 
 class LoginUserRequest(BaseModel):
     email: EmailStr

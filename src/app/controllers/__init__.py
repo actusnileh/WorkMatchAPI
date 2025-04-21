@@ -3,7 +3,7 @@ from .auth import AuthController
 from .specialist import SpecialistController
 from .user import UserController
 from .vacancy import VacancyController
-
+from .analysis import AnalysisController
 
 __all__ = [
     "AuthController",
@@ -11,4 +11,5 @@ __all__ = [
     "VacancyController",
     "SpecialistController",
     "ApplicationController",
+    "AnalysisController",
 ]

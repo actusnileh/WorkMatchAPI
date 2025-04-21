@@ -38,6 +38,7 @@ class Specialist(Base, TimestampMixin):
     skills = relationship("SpecialistSkill", back_populates="specialist")
     experiences = relationship("SpecialistExperience", back_populates="specialist")
     applications = relationship("Application", back_populates="specialist")
+    analysis_results = relationship("AnalysisResult", back_populates="specialist", cascade="all, delete-orphan")
 
     __mapper_args__ = {"eager_defaults": True}
 

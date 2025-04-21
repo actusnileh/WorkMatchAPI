@@ -6,18 +6,21 @@ from app.controllers import (
     SpecialistController,
     UserController,
     VacancyController,
+    AnalysisController,
 )
 from app.models import (
     Application,
     Specialist,
     User,
     Vacancy,
+    AnalysisResult,
 )
 from app.repositories import (
     ApplicationRepository,
     SpecialistRepository,
     UserRepository,
     VacancyRepository,
+    AnalysisRepository,
 )
 from core.database import get_session
 
@@ -38,6 +41,10 @@ class Factory:
     @staticmethod
     def application_repository(db_session):
         return ApplicationRepository(Application, db_session)
+
+    @staticmethod
+    def analysis_repository(db_session):
+        return AnalysisRepository(AnalysisResult, db_session)
 
     def get_user_controller(self, db_session=Depends(get_session)):
         return UserController(
@@ -65,3 +72,6 @@ class Factory:
             specialist_repository=self.specialist_repository(db_session),
             vacancy_repository=self.vacancy_repository(db_session),
         )
+
+    def get_analysis_controller(self, db_session=Depends(get_session)):
+        return AnalysisController(analysis_repository=self.analysis_repository(db_session))
