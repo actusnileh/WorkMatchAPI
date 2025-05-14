@@ -15,6 +15,7 @@ from app.schemas.requests.vacancy import (
     EditVacancyRequest,
 )
 from app.schemas.responses.vacancy import (
+    ListPaginatedVacancyResponse,
     ListVacancyResponse,
     VacancyResponse,
 )
@@ -54,7 +55,6 @@ async def create_vacancy(
         created_by=user,
         employment_type_str=create_vacancy_request.employment_type_str,
     )
-    await Cache.remove_by_prefix("vacancy:all")
     await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
     await Cache.remove_by_prefix(f"vacancy:uuid:{vacancy[0].uuid}")
     return VacancyResponse.from_orm(vacancy[0])
@@ -65,18 +65,18 @@ async def create_vacancy(
     summary="Получить список вакансий",
     status_code=200,
 )
-@Cache.cached(prefix="vacancy:all", ttl=60)
 async def get_vacancies(
     skip: int = 0,
     limit: int = 50,
     vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
-) -> ListVacancyResponse:
+) -> ListPaginatedVacancyResponse:
     """
     Возвращает список всех вакансий с пагинацией.
     """
-    vacancies = await vacancy_controller.get_all(skip, limit)
-    return ListVacancyResponse(
+    vacancies, total_count = await vacancy_controller.get_all(skip, limit)
+    return ListPaginatedVacancyResponse(
         Vacancies=[VacancyResponse.from_orm(v) for v in vacancies],
+        Count=total_count,
     )
 
 
@@ -160,7 +160,6 @@ async def edit_vacancy(
         uuid=vacancy_uuid,
         attrs=edit_vacancy_request.model_dump(exclude_unset=True),
     )
-    await Cache.remove_by_prefix("vacancy:all")
     await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
     await Cache.remove_by_prefix(f"vacancy:uuid:{vacancy_uuid}")
     return VacancyResponse.from_orm(vacancy)
@@ -184,6 +183,5 @@ async def delete_vacancy(
     Удаляет вакансию, указанную по UUID.
     """
     await vacancy_controller.delete_by_uuid(user, vacancy_uuid)
-    await Cache.remove_by_prefix("vacancy:all")
     await Cache.remove_by_prefix(f"vacancy:me:{user.o_id}")
     await Cache.remove_by_prefix("vacancy:uuid")

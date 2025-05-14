@@ -73,7 +73,7 @@ class VacancyController(BaseController[Vacancy]):
 
         return created_vacancy
 
-    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Vacancy]:
+    async def get_all(self, skip: int = 0, limit: int = 100) -> tuple[list[Vacancy], int]:
         return await self.vacancy_repository.get_all(skip=skip, limit=limit, join_={"employment_types"})
 
     @Transactional()

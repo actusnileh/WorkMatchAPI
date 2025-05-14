@@ -38,14 +38,17 @@ class BaseRepository(Generic[ModelType]):
         skip: int = 0,
         limit: int = 100,
         join_: set[str] | None = None,
-    ) -> list[ModelType]:
+    ) -> tuple[list[ModelType], int]:
         query = self._query(join_)
+        total_count = await self._count(query)
         query = query.offset(skip).limit(limit)
 
         if join_ is not None:
-            return await self._all_unique(query)
+            data = await self._all_unique(query)
+        else:
+            data = await self._all(query)
 
-        return await self._all(query)
+        return data, total_count
 
     async def get_by(
         self,

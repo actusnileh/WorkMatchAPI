@@ -49,3 +49,8 @@ class VacancyResponse(BaseModel):
 
 class ListVacancyResponse(BaseModel):
     Vacancies: list[VacancyResponse]
+
+
+class ListPaginatedVacancyResponse(BaseModel):
+    Vacancies: list[VacancyResponse]
+    Count: int
