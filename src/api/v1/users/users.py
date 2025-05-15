@@ -19,7 +19,6 @@ from app.schemas.responses.users import (
     RegisterUserResponse,
     UserResponse,
 )
-from core.cache import Cache
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -68,7 +67,6 @@ async def login_user(
     dependencies=[Depends(AuthenticationRequired)],
     summary="Получить информацию о текущем пользователе",
 )
-@Cache.cached(prefix="user:me", ttl=60)
 async def get_user(
     user: User = Depends(get_current_user),
 ) -> UserResponse:
@@ -95,7 +93,6 @@ async def edit_user(
         user=user,
         attrs=edit_user_request.model_dump(exclude_unset=True),
     )
-    await Cache.remove_by_prefix("user:me")
     return UserResponse.from_orm(updated_user)
 
 
@@ -117,5 +114,4 @@ async def edit_user_password(
         edit_password_request.old_password,
         edit_password_request.new_password,
     )
-    await Cache.remove_by_prefix("user:me")
     return UserResponse.from_orm(updated_user)

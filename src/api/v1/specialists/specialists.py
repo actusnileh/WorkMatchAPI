@@ -21,7 +21,6 @@ from app.schemas.responses.specialist import (
     SpecialistResponse,
     SpecialistResponseWithAdditional,
 )
-from core.cache import Cache
 from core.factory.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -37,7 +36,6 @@ specialist_router = APIRouter()
     summary="Получить информацию о специалисте",
     status_code=200,
 )
-@Cache.cached(prefix="specialist:uuid", ttl=60)
 async def get_specialist_by_uuid(
     specialist_uuid: UUID,
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
@@ -55,7 +53,6 @@ async def get_specialist_by_uuid(
     summary="Получить специалистов текущего пользователя",
     status_code=200,
 )
-@Cache.cached(prefix="specialist:user", ttl=60)
 async def get_my_specialists(
     user: User = Depends(get_current_user),
     specialist_controller: SpecialistController = Depends(Factory().get_specialist_controller),
@@ -92,7 +89,6 @@ async def create_specialist(
         about_me=create_specialist_request.about_me,
         employment_type_str=create_specialist_request.employment_type_str,
     )
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponse.from_orm(specialist)
 
 
@@ -119,8 +115,6 @@ async def edit_specialist(
         uuid=specialist_uuid,
         attrs=edit_specialist_request.model_dump(exclude_unset=True),
     )
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponse.from_orm(specialist)
 
 
@@ -147,8 +141,6 @@ async def add_skill(
         specialist_uuid,
         add_skill_specialist_request.skill,
     )
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponseWithAdditional.from_orm(response)
 
 
@@ -175,8 +167,6 @@ async def remove_skill(
         specialist_uuid,
         skill,
     )
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponseWithAdditional.from_orm(response)
 
 
@@ -206,8 +196,6 @@ async def add_experience(
         add_experience_specialist_request.start_date,
         add_experience_specialist_request.end_date,
     )
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponseWithAdditional.from_orm(response)
 
 
@@ -234,8 +222,6 @@ async def remove_experience(
         specialist_uuid,
         experience_uuid,
     )
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")
     return SpecialistResponseWithAdditional.from_orm(response)
 
 
@@ -257,5 +243,3 @@ async def delete_specialist(
     Удаляет специалиста по его UUID.
     """
     await specialist_controller.delete_by_uuid(user, specialist_uuid)
-    await Cache.remove_by_prefix(f"specialist:uuid:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"specialist:user:{user.o_id}")

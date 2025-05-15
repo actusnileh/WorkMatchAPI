@@ -11,7 +11,6 @@ from app.schemas.responses.application import (
     ApplicationResponse,
     ListApplicationResponse,
 )
-from core.cache import Cache
 from core.factory import Factory
 from core.fastapi.dependencies.authentication import AuthenticationRequired
 from core.fastapi.dependencies.current_user import get_current_user
@@ -25,7 +24,6 @@ application_router = APIRouter()
     response_model=ListApplicationResponse,
     summary="Получить отклики по специалисту",
 )
-@Cache.cached(prefix="application:specialist", ttl=60)
 async def get_all_applications_by_specialist(
     specialist_uuid: UUID,
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
@@ -42,7 +40,6 @@ async def get_all_applications_by_specialist(
     response_model=ListApplicationResponse,
     summary="Получить отклики по вакансии",
 )
-@Cache.cached(prefix="application:vacancy", ttl=60)
 async def get_all_applications_by_vacancy(
     vacancy_uuid: UUID,
     application_controller: ApplicationController = Depends(Factory().get_application_controller),
@@ -73,9 +70,6 @@ async def create_application(
     """
     Создает новую отклик текущего пользователя на указанную вакансию у специалиста.
     """
-    await Cache.remove_by_prefix(f"application:specialist:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"application:vacancy:{vacancy_uuid}")
-
     application = await application_controller.create(user, specialist_uuid, vacancy_uuid)
     return ApplicationResponse.from_orm(application)
 
@@ -113,7 +107,4 @@ async def delete_application(
     """
     Удаляет отклик текущего пользователя на указанную вакансию у специалиста.
     """
-    await Cache.remove_by_prefix(f"application:specialist:{specialist_uuid}")
-    await Cache.remove_by_prefix(f"application:vacancy:{vacancy_uuid}")
-
     await application_controller.delete_by_specialist(user, specialist_uuid, vacancy_uuid)
