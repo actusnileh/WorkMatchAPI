@@ -149,7 +149,7 @@ class VacancyController(BaseController[Vacancy]):
         """
         Индексация вакансии в Elasticsearch.
         """
-        vacancy = vacancy[0]
+        vacancy = vacancy[0] if isinstance(vacancy, list) else vacancy
         document = {
             "o_id": vacancy.o_id,
             "uuid": str(vacancy.uuid),
