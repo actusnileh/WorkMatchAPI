@@ -13,6 +13,7 @@ from app.models import (
 )
 from app.repositories import SpecialistRepository
 from core.controller import BaseController
+from core.exceptions import BadRequestException
 from core.database import Transactional
 from core.utils.datetime_util import utcnow
 
@@ -39,7 +40,7 @@ class SpecialistController(BaseController[Specialist]):
                 detail="Указанный тип занятости не найден. Возможные значения: full-time, part-time.",
             )
 
-        return await self.specialist_repository.create(
+        created_specialist = await self.specialist_repository.create(
             {
                 "created_by": created_by.o_id,
                 "full_name": created_by.full_name,
@@ -48,6 +49,7 @@ class SpecialistController(BaseController[Specialist]):
                 "employment_type_id": employment_type.o_id,
             },
         )
+        return created_specialist, employment_type
 
     async def get_by_uuid(self, uuid: str) -> Specialist:
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
@@ -61,6 +63,7 @@ class SpecialistController(BaseController[Specialist]):
     @Transactional()
     async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> Specialist:
         attrs["updated_at"] = utcnow()
+
         specialist: Specialist = await self.specialist_repository.get_by_uuid(uuid=uuid)
         if not specialist:
             raise HTTPException(
@@ -73,7 +76,16 @@ class SpecialistController(BaseController[Specialist]):
                 detail="Недостаточно прав для редактирования данного резюме.",
             )
 
-        return await self.specialist_repository._update(specialist, attrs)
+        if "employment_type_str" in attrs:
+            employment_type = await self.specialist_repository.get_employment_type_by_name(
+                attrs.pop("employment_type_str")
+            )
+            if not employment_type:
+                raise BadRequestException("Указанный тип занятости не найден.")
+            attrs["employment_type"] = employment_type
+
+        updated_specialist = await self.specialist_repository._update(specialist, attrs)
+        return updated_specialist
 
     async def add_skill(self, user: User, uuid: UUID4, skill_name: str) -> Specialist:
         normalized_skill_name = re.sub(r"\s+", " ", skill_name.strip().lower())

@@ -9,7 +9,7 @@ from pydantic import (
     UUID4,
 )
 
-from app.models import Specialist
+from app.models import Specialist, EmploymentType
 
 
 class SpecialistResponse(BaseModel):
@@ -17,16 +17,18 @@ class SpecialistResponse(BaseModel):
     full_name: str = Field(..., json_schema_extra={"example": "Петров Пётр Петрович"})
     position: str = Field(..., json_schema_extra={"example": "Junior"})
     about_me: str = Field(..., json_schema_extra={"example": "Изучал джанго, фастапи ..."})
+    employment_type: str = Field(..., json_schema_extra={"example": "full-time"})
 
     model_config = ConfigDict(from_attributes=True)
 
     @classmethod
-    def from_orm(cls, specialist: Specialist):
+    def from_orm(cls, specialist: Specialist, employment_type: EmploymentType = None):
         return cls(
             uuid=specialist.uuid,
             full_name=specialist.full_name,
             about_me=specialist.about_me,
             position=specialist.position,
+            employment_type=employment_type.name if employment_type is not None else specialist.employment_type.name,
         )
 
 

@@ -83,13 +83,13 @@ async def create_specialist(
     """
     Создает нового специалиста, связанного с текущим пользователем.
     """
-    specialist: Specialist = await specialist_controller.create_specialist(
+    specialist, employment_type = await specialist_controller.create_specialist(
         created_by=user,
         position=create_specialist_request.position,
         about_me=create_specialist_request.about_me,
         employment_type_str=create_specialist_request.employment_type_str,
     )
-    return SpecialistResponse.from_orm(specialist)
+    return SpecialistResponse.from_orm(specialist, employment_type)
 
 
 @specialist_router.patch(

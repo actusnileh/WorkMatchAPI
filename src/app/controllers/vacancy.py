@@ -77,14 +77,8 @@ class VacancyController(BaseController[Vacancy]):
         return await self.vacancy_repository.get_all(skip=skip, limit=limit, join_={"employment_types"})
 
     @Transactional()
-    async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> User:
+    async def update_by_uuid(self, user: User, uuid: UUID4, attrs: dict) -> Vacancy:
         attrs["updated_at"] = utcnow()
-
-        if "employment_type_str" in attrs:
-            employment_type = await self.vacancy_repository.get_employment_type_by_name(attrs.pop("employment_type_str"))
-            if not employment_type:
-                raise BadRequestException("Указанный тип занятости не найден.")
-            attrs["employment_type"] = employment_type
 
         vacancy: Vacancy = await self.vacancy_repository.get_by_uuid(uuid=uuid)
         if not vacancy:
@@ -94,6 +88,14 @@ class VacancyController(BaseController[Vacancy]):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Недостаточно прав для редактирования вакансии '{vacancy.title}'.",
             )
+
+        if "employment_type_str" in attrs:
+            employment_type = await self.vacancy_repository.get_employment_type_by_name(
+                attrs.pop("employment_type_str")
+            )
+            if not employment_type:
+                raise BadRequestException("Указанный тип занятости не найден.")
+            attrs["employment_type"] = employment_type
 
         updated_vacancy = await self.vacancy_repository._update(vacancy, attrs)
 
