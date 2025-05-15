@@ -12,7 +12,6 @@ from core.repository import BaseRepository
 
 
 class VacancyRepository(BaseRepository[Vacancy]):
-
     async def get_employment_type_by_name(
         self,
         name: str,
