@@ -17,6 +17,7 @@ from app.admin import (
     ApplicationAdmin,
     UserAdmin,
     VacancyAdmin,
+    AnalysisResultAdmin,
 )
 from core.cache import (
     Cache,
@@ -107,6 +108,7 @@ def create_app() -> FastAPI:
     admin.add_view(RoleAdmin)
     admin.add_view(ExperienceAdmin)
     admin.add_view(ApplicationAdmin)
+    admin.add_view(AnalysisResultAdmin)
     return app_
 
 

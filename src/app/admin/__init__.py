@@ -5,6 +5,7 @@ from .specialist import SpecialistAdmin
 from .user import UserAdmin
 from .vacancy import VacancyAdmin
 from .applications import ApplicationAdmin
+from .analysis import AnalysisResultAdmin
 
 __all__ = [
     "UserAdmin",
@@ -14,4 +15,5 @@ __all__ = [
     "ApplicationAdmin",
     "RoleAdmin",
     "ExperienceAdmin",
+    "AnalysisResultAdmin",
 ]
