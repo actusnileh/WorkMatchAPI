@@ -17,6 +17,7 @@ from app.models import (
     AnalysisResult,
 )
 from core.config import config
+from core.elasticsearch import es_client
 
 DATABASE_URL = config.POSTGRES_URL
 
@@ -100,7 +101,7 @@ async def generate_users(db: AsyncSession, roles: list, hr_count: int = 2, user_
         user = User(
             uuid=uuid4(),
             email=fake.unique.email(),
-            password=pwd_context.hash(fake.password()),
+            password=pwd_context.hash("123123qwe"),
             username=fake.unique.user_name(),
             full_name=fake.name(),
             is_active=True,
@@ -113,7 +114,7 @@ async def generate_users(db: AsyncSession, roles: list, hr_count: int = 2, user_
         user = User(
             uuid=uuid4(),
             email=fake.unique.email(),
-            password=pwd_context.hash(fake.password()),
+            password=pwd_context.hash("123123qwe"),
             username=fake.unique.user_name(),
             full_name=fake.name(),
             is_active=True,
@@ -379,6 +380,19 @@ async def main():
             full_name="Actus Nileh",
             password="123123qwe",
         )
+
+        for vacancy in vacancies:
+            document = {
+                "o_id": vacancy.o_id,
+                "uuid": str(vacancy.uuid),
+                "title": vacancy.title,
+                "description": vacancy.description,
+                "requirements": vacancy.requirements,
+                "conditions": vacancy.conditions,
+                "salary": vacancy.salary,
+                "employment_type_id": vacancy.employment_type_id,
+            }
+            await es_client.index(index="vacancies", id=vacancy.o_id, document=document)
 
 
 if __name__ == "__main__":
