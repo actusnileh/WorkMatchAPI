@@ -10,9 +10,9 @@ class AnalysisController(BaseController[AnalysisResult]):
         self.analysis_repository = analysis_repository
 
     async def get_by_specialist(self, specialist_uuid: str, vacancy_uuid: str) -> AnalysisResult:
-        analysis = await self.analysis_repository.get_by_specialist(
-            specialist_uuid,
-            vacancy_uuid,
+        analysis = await self.analysis_repository.get_by_specialist_vacancy(
+            specialist_uuid=specialist_uuid,
+            vacancy_uuid=vacancy_uuid,
         )
         if not analysis:
             raise HTTPException(

@@ -249,7 +249,7 @@ async def generate_specialist_skills(db: AsyncSession, specialists: list, count_
         "Linux",
         "Bash",
         "PowerShell",
-        "REST API",
+        "REST-API",
         "GraphQL",
         "gRPC",
         "WebSocket",
@@ -270,10 +270,10 @@ async def generate_specialist_skills(db: AsyncSession, specialists: list, count_
         "LightGBM",
         "CatBoost",
         "Tableau",
-        "Power BI",
+        "Power-BI",
         "Matplotlib",
         "Seaborn",
-        "Apache Spark",
+        "Apache-Spark",
         "Hadoop",
         "Selenium",
         "Cypress",
@@ -289,14 +289,14 @@ async def generate_specialist_skills(db: AsyncSession, specialists: list, count_
         "Agile",
         "Scrum",
         "Kanban",
-        "UI/UX Design",
+        "UI/UX-Design",
         "Cybersecurity",
         "Blockchain",
         "Web3",
         "IoT",
-        "AR/VR Development",
-        "Game Development",
-        "Unreal Engine",
+        "AR/VR-Development",
+        "Game-Development",
+        "Unreal-Engine",
         "Unity",
     ]
     for specialist in specialists:
@@ -347,15 +347,41 @@ async def generate_applications(db: AsyncSession, specialists: list, vacancies: 
 
 
 async def generate_analysis_results(db: AsyncSession, specialists: list, vacancies: list, count: int = 25):
-    for _ in range(count):
+    applications = await db.execute(text("SELECT specialist_uuid, vacancy_uuid FROM applications"))
+    valid_pairs = [(row["specialist_uuid"], row["vacancy_uuid"]) for row in applications.mappings()]
+
+    if not valid_pairs:
+        print("No applications found. Skipping analysis results generation.")
+        return
+
+    generated_count = 0
+    max_attempts = count * 2
+    attempts = 0
+    while generated_count < count and attempts < max_attempts:
+        specialist_uuid, vacancy_uuid = random.choice(valid_pairs)
+
+        existing_result = await db.execute(
+            text("SELECT 1 FROM analysis_results WHERE specialist_uuid = :s_uuid AND vacancy_uuid = :v_uuid"),
+            {"s_uuid": specialist_uuid, "v_uuid": vacancy_uuid},
+        )
+        if existing_result.mappings().first():
+            attempts += 1
+            continue
+
         result = AnalysisResult(
-            vacancy_uuid=random.choice(vacancies).uuid,
-            specialist_uuid=random.choice(specialists).uuid,
+            vacancy_uuid=vacancy_uuid,
+            specialist_uuid=specialist_uuid,
             match_percentage=round(random.uniform(50.00, 99.99), 2),
             mismatches=[fake.sentence() for _ in range(random.randint(0, 3))] if random.choice([True, False]) else None,
         )
         db.add(result)
+        generated_count += 1
+        attempts += 1
+
     await db.commit()
+
+    if generated_count < count:
+        print(f"Generated only {generated_count} analysis results due to limited applications.")
 
 
 async def main():
