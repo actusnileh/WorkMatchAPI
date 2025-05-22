@@ -9,7 +9,10 @@ from pydantic import (
     UUID4,
 )
 
-from app.models import Specialist, EmploymentType
+from app.models import (
+    EmploymentType,
+    Specialist,
+)
 
 
 class SpecialistResponse(BaseModel):

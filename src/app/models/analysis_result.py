@@ -1,12 +1,12 @@
-from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import (
-    UUID,
     BigInteger,
     Column,
     ForeignKey,
     Numeric,
     Text,
+    UUID,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
 from core.database import Base

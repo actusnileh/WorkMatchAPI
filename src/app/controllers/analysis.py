@@ -1,4 +1,8 @@
-from fastapi import HTTPException, status
+from fastapi import (
+    HTTPException,
+    status,
+)
+
 from app.models import AnalysisResult
 from app.repositories import AnalysisRepository
 from core.controller import BaseController

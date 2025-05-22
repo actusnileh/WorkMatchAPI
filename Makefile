@@ -1,36 +1,61 @@
 DC = docker compose
-APP_FILE = docker/app.yaml
-STORAGE_FILE = docker/storage.yaml
-BROKER_FILE = docker/broker.yaml
-
+COMPOSE_FILES = -f docker/app.yaml -f docker/storage.yaml -f docker/broker.yaml
 ENV_FILE = --env-file .env
 EXEC = docker exec -it
 APP_CONTAINER = work_match_api
 
-.PHONY: build
+.PHONY: build start stop restart status clean
+
 build:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE} up --build -d
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} up --build -d
 
-.PHONY: drop-all
-drop-all:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE}  down
+start:
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} up -d
 
-.PHONY: logs-app
+stop:
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} down
+
+restart: stop start
+
+status:
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} ps
+
+clean:
+	@read -p "This will remove all containers, networks, and volumes. Are you sure? [y/N]: " confirm && \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		${DC} ${COMPOSE_FILES} ${ENV_FILE} down -v; \
+	else \
+		echo "Aborted."; \
+	fi
+
+.PHONY: logs logs-app logs-errors
+
 logs-app:
-	${DC} -f ${APP_FILE} ${ENV_FILE}  logs -f
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} logs -f fastapi
 
-.PHONY: logs
 logs:
-	${DC} -f ${APP_FILE} -f ${STORAGE_FILE} -f ${BROKER_FILE} ${ENV_FILE}  logs -f
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} logs -f
 
-.PHONY: alembic-upgrade
+logs-errors:
+	${DC} ${COMPOSE_FILES} ${ENV_FILE} logs 2>&1 | grep -i "error"
+
+.PHONY: alembic-upgrade alembic-downgrade alembic-revision
+
 alembic-upgrade:
 	${EXEC} ${APP_CONTAINER} alembic upgrade head
 
-.PHONY: alembic-downgrade
 alembic-downgrade:
 	${EXEC} ${APP_CONTAINER} alembic downgrade -1
 
-.PHONY: alembic-revision
 alembic-revision:
 	${EXEC} ${APP_CONTAINER} alembic revision --autogenerate
+
+.PHONY: test
+
+test:
+	${EXEC} ${APP_CONTAINER} pytest
+
+.PHONY: generate-fake-data
+
+generate-fake-data:
+	${EXEC} ${APP_CONTAINER} python src/generate_fake_data.py

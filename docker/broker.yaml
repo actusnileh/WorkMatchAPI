@@ -10,6 +10,14 @@ services:
             RABBITMQ_DEFAULT_PASS: guest
         networks:
             - work_match_api
+        healthcheck:
+            test: ["CMD", "rabbitmqctl", "status"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
+
 networks:
     work_match_api:
         driver: bridge

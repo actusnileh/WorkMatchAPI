@@ -1,11 +1,13 @@
 import httpx
 from asgiref.sync import async_to_sync
 from celery import Celery
-from core.config import config
+
 from app.models import AnalysisResult
 from app.repositories.analysis import AnalysisRepository
+from core.config import config
 from core.database import standalone_session
 from core.database.session import async_session_factory
+
 
 celery_app = Celery(
     "worker",

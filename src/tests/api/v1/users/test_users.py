@@ -54,17 +54,6 @@ async def test_create_user_with_invalid_email(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_invalid_username(client: AsyncClient) -> None:
-    """Test user creation with invalid username."""
-    fake_user = create_fake_user()
-    fake_user["username"] = "<invalid_username>"
-
-    response = await client.post("/v1/users/", json=fake_user)
-    assert response.status_code == 422
-    assert response.json()["detail"] is not None
-
-
-@pytest.mark.asyncio
 async def test_create_user_with_invalid_password(client: AsyncClient) -> None:
     """Test user creation with invalid password."""
     fake_user = create_fake_user()

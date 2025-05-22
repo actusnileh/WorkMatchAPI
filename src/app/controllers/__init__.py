@@ -1,9 +1,10 @@
+from .analysis import AnalysisController
 from .application import ApplicationController
 from .auth import AuthController
 from .specialist import SpecialistController
 from .user import UserController
 from .vacancy import VacancyController
-from .analysis import AnalysisController
+
 
 __all__ = [
     "AuthController",
