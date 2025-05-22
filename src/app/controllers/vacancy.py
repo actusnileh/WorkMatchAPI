@@ -136,11 +136,18 @@ class VacancyController(BaseController[Vacancy]):
     async def search_vacancies(self, query: str, skip: int = 0, limit: int = 10) -> list[Vacancy]:
         body = {
             "query": {
-                "multi_match": {"query": query, "fields": ["title", "description", "requirements", "conditions"]},
+                "multi_match": {
+                    "query": query,
+                    "fields": ["title", "description", "requirements", "conditions"],
+                    "fuzziness": "AUTO",
+                    "prefix_length": 2,
+                    "operator": "and",
+                }
             },
             "from": skip,
             "size": limit,
         }
+
         response = await es_client.search(index="vacancies", body=body)
         hits = response["hits"]["hits"]
 

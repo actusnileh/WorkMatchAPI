@@ -43,7 +43,7 @@ class VacancyResponse(BaseModel):
             requirements=vacancy.requirements,
             conditions=vacancy.conditions,
             salary=vacancy.salary,
-            employment_type=vacancy.employment_type.name,
+            employment_type=vacancy.employment_type.name if vacancy.employment_type else "full-time"
         )
 
 

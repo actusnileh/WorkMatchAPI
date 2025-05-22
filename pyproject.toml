@@ -32,6 +32,7 @@ ujson = "^5.10.0"
 elasticsearch = "^8.17.2"
 aiohttp = "^3.11.14"
 celery = "^5.4.0"
+asgiref = "^3.8.1"
 
 
 [tool.poetry.group.dev.dependencies]
