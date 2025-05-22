@@ -1,23 +1,30 @@
 import asyncio
-from uuid import uuid4
 import random
+from uuid import uuid4
+
 from faker import Faker
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.sql import text
 from passlib.context import CryptContext
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    AsyncSession,
+    create_async_engine,
+)
+from sqlalchemy.sql import text
+
 from app.models import (
-    Role,
-    EmploymentType,
-    User,
-    Specialist,
-    Vacancy,
-    SpecialistSkill,
-    SpecialistExperience,
-    Application,
     AnalysisResult,
+    Application,
+    EmploymentType,
+    Role,
+    Specialist,
+    SpecialistExperience,
+    SpecialistSkill,
+    User,
+    Vacancy,
 )
 from core.config import config
 from core.elasticsearch import es_client
+
 
 DATABASE_URL = config.POSTGRES_URL
 
@@ -72,7 +79,8 @@ async def generate_superuser(db: AsyncSession, email: str, username: str, full_n
         await db.refresh(admin_role)
 
     existing_user = await db.execute(
-        text("SELECT * FROM users WHERE email = :email OR username = :username"), {"email": email, "username": username}
+        text("SELECT * FROM users WHERE email = :email OR username = :username"),
+        {"email": email, "username": username},
     )
     if existing_user.mappings().first():
         raise ValueError(f"User with email {email} or username {username} already exists.")
@@ -372,7 +380,11 @@ async def generate_analysis_results(db: AsyncSession, specialists: list, vacanci
             vacancy_uuid=vacancy_uuid,
             specialist_uuid=specialist_uuid,
             match_percentage=round(random.uniform(50.00, 99.99), 2),
-            mismatches=[fake.sentence() for _ in range(random.randint(0, 3))] if random.choice([True, False]) else None,
+            mismatches=(
+                [fake.sentence() for _ in range(random.randint(1, 3))]
+                if random.choice([True, False])
+                else [fake.sentence()]
+            ),
         )
         db.add(result)
         generated_count += 1

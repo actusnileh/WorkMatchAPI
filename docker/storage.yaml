@@ -12,6 +12,13 @@ services:
             - work_match_api_postgres:/var/lib/postgresql/data
         networks:
             - work_match_api
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
 
     redis:
         image: redis
@@ -22,6 +29,12 @@ services:
             - work_match_api_redis:/data
         networks:
             - work_match_api
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
         restart: unless-stopped
 
     elasticsearch:
@@ -37,6 +50,18 @@ services:
             - work_match_api_elastic:/usr/share/elasticsearch/data
         networks:
             - work_match_api
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "curl -fsSL http://localhost:9200/_cluster/health || exit 1",
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
+
     kibana:
         image: kibana:8.16.6
         container_name: work_match_api_kibana
@@ -48,6 +73,17 @@ services:
             - elasticsearch
         networks:
             - work_match_api
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "curl -fsSL http://localhost:5601/api/status || exit 1",
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
 
 volumes:
     work_match_api_postgres:

@@ -13,8 +13,8 @@ from app.models import (
 )
 from app.repositories import SpecialistRepository
 from core.controller import BaseController
-from core.exceptions import BadRequestException
 from core.database import Transactional
+from core.exceptions import BadRequestException
 from core.utils.datetime_util import utcnow
 
 
@@ -78,7 +78,7 @@ class SpecialistController(BaseController[Specialist]):
 
         if "employment_type_str" in attrs:
             employment_type = await self.specialist_repository.get_employment_type_by_name(
-                attrs.pop("employment_type_str")
+                attrs.pop("employment_type_str"),
             )
             if not employment_type:
                 raise BadRequestException("Указанный тип занятости не найден.")

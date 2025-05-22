@@ -12,6 +12,7 @@ from app.schemas.responses.analysis import (
 )
 from core.factory import Factory
 
+
 analyse_router = APIRouter()
 
 

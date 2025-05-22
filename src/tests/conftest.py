@@ -1,5 +1,3 @@
-import os
-
 import pytest_asyncio
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import (
@@ -15,14 +13,9 @@ from app.models.role import Role
 from core.config import config
 
 
-TEST_DATABASE_URL = os.getenv("TEST_POSTGRES_URL")
-
-config.POSTGRES_URL = TEST_DATABASE_URL
-
-
 @pytest_asyncio.fixture(scope="function")
 async def db_session() -> AsyncSession:
-    async_engine = create_async_engine(config.POSTGRES_URL)
+    async_engine = create_async_engine(config.POSTGRES_URL_TEST)
     session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
     async with session() as s:

@@ -91,7 +91,7 @@ class VacancyController(BaseController[Vacancy]):
 
         if "employment_type_str" in attrs:
             employment_type = await self.vacancy_repository.get_employment_type_by_name(
-                attrs.pop("employment_type_str")
+                attrs.pop("employment_type_str"),
             )
             if not employment_type:
                 raise BadRequestException("Указанный тип занятости не найден.")

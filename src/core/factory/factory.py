@@ -1,26 +1,26 @@
 from fastapi import Depends
 
 from app.controllers import (
+    AnalysisController,
     ApplicationController,
     AuthController,
     SpecialistController,
     UserController,
     VacancyController,
-    AnalysisController,
 )
 from app.models import (
+    AnalysisResult,
     Application,
     Specialist,
     User,
     Vacancy,
-    AnalysisResult,
 )
 from app.repositories import (
+    AnalysisRepository,
     ApplicationRepository,
     SpecialistRepository,
     UserRepository,
     VacancyRepository,
-    AnalysisRepository,
 )
 from core.database import get_session
 

@@ -10,14 +10,14 @@ from sqladmin import Admin
 
 from api import router
 from app.admin import (
+    AnalysisResultAdmin,
+    ApplicationAdmin,
     ExperienceAdmin,
     RoleAdmin,
     SkillAdmin,
     SpecialistAdmin,
-    ApplicationAdmin,
     UserAdmin,
     VacancyAdmin,
-    AnalysisResultAdmin,
 )
 from core.cache import (
     Cache,
@@ -88,6 +88,7 @@ def create_app() -> FastAPI:
     app_ = FastAPI(
         title="WorkMatchAPI",
         version="1.0.0",
+        debug=True if config.ENVIRONMENT == "development" else False,
         docs_url=None if config.ENVIRONMENT == "production" else "/docs",
         redoc_url=None if config.ENVIRONMENT == "production" else "/redoc",
         middleware=make_middleware(),

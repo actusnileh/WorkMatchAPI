@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -15,10 +15,17 @@ class BaseConfig(BaseSettings):
 
 
 class Config(BaseConfig):
-    DEBUG: int = 0
     ENVIRONMENT: str = EnvironmentType.DEVELOPMENT
 
-    POSTGRES_URL: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_DB: str
+    POSTGRES_DB_TEST: str
+
+    POSTGRES_URL: str | None = None
+    POSTGRES_URL_TEST: str | None = None
 
     REDIS_URL: str
 
@@ -31,6 +38,42 @@ class Config(BaseConfig):
     JWT_ALGORITHM: str = "HS256"
     RELEASE_VERSION: str = "0.1"
     JWT_EXPIRE_MINUTES: int = 60 * 24
+
+    @field_validator("POSTGRES_URL", mode="before")
+    def assemble_postgres_url(cls, v, info):
+        if v:
+            return v
+
+        data = info.data or {}
+
+        user = data.get("POSTGRES_USER")
+        password = data.get("POSTGRES_PASSWORD")
+        host = data.get("POSTGRES_HOST")
+        port = data.get("POSTGRES_PORT")
+        db = data.get("POSTGRES_DB")
+
+        if all([user, password, host, port, db]):
+            return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
+
+        raise ValueError("Incomplete test Postgres config")
+
+    @field_validator("POSTGRES_URL_TEST", mode="before")
+    def assemble_postgres_url_test(cls, v, info):
+        if v:
+            return v
+
+        data = info.data or {}
+
+        user = data.get("POSTGRES_USER")
+        password = data.get("POSTGRES_PASSWORD")
+        host = data.get("POSTGRES_HOST")
+        port = data.get("POSTGRES_PORT")
+        db = data.get("POSTGRES_DB_TEST")
+
+        if all([user, password, host, port, db]):
+            return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
+
+        raise ValueError("Incomplete test Postgres config")
 
 
 config: Config = Config()
