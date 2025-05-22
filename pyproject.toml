@@ -30,6 +30,7 @@ dependencies = [
     "elasticsearch>=8.17.2,<9",
     "aiohttp>=3.11.14,<4",
     "celery>=5.4.0,<6",
+    "asgiref=^3.8.1",
 ]
 
 [dependency-groups]

@@ -1,6 +1,5 @@
-import asyncio
-
 import httpx
+from asgiref.sync import async_to_sync
 from celery import Celery
 
 from app.models import AnalysisResult
@@ -18,12 +17,6 @@ celery_app = Celery(
 
 celery_app.conf.update(task_track_started=True)
 
-client = httpx.AsyncClient(
-    base_url=config.NEURAL_SERVICE_URL,
-    timeout=httpx.Timeout(230.0, connect=5.0),
-    limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
-)
-
 
 @celery_app.task(
     bind=True,
@@ -34,20 +27,25 @@ client = httpx.AsyncClient(
     max_retries=5,
 )
 def apply_neural_network(self, vacancy, specialist) -> dict:
-    result = asyncio.run(async_apply_neural_network(vacancy, specialist))
+    result = async_to_sync(async_apply_neural_network)(vacancy, specialist)
     return result
 
 
 async def async_apply_neural_network(vacancy, specialist):
-    resp = await client.post(
-        url="/vacancy_match",
-        json={
-            "job": vacancy,
-            "resume": specialist,
-        },
-    )
-    resp.raise_for_status()
-    result = resp.json()
+    async with httpx.AsyncClient(
+        base_url=config.NEURAL_SERVICE_URL,
+        timeout=httpx.Timeout(230.0, connect=5.0),
+        limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
+    ) as client:
+        resp = await client.post(
+            url="/vacancy_match",
+            json={
+                "job": vacancy,
+                "resume": specialist,
+            },
+        )
+        resp.raise_for_status()
+        result = resp.json()
 
     await create_analysis_result(vacancy, specialist, result)
     return result
@@ -57,8 +55,8 @@ async def async_apply_neural_network(vacancy, specialist):
 async def create_analysis_result(vacancy, specialist, result):
     await AnalysisRepository(model=AnalysisResult, db_session=async_session_factory()).create(
         {
-            "vacancy_id": vacancy["uuid"],
-            "specialist_id": specialist["uuid"],
+            "vacancy_uuid": vacancy["uuid"],
+            "specialist_uuid": specialist["uuid"],
             "match_percentage": result["match_percentage"],
             "mismatches": result["didnt_match"],
         },
