@@ -26,7 +26,9 @@ async def test_create_specialist(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_specialist_failed_with_employment_type(client: AsyncClient) -> None:
+async def test_create_specialist_failed_with_employment_type(
+    client: AsyncClient,
+) -> None:
     faker = Faker()
     await _create_user_and_login(client)
     specialist_json = {
@@ -65,7 +67,9 @@ async def test_get_specialist_by_uuid(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_specialist_by_uuid_failed_with_invalid_uuid(client: AsyncClient) -> None:
+async def test_get_specialist_by_uuid_failed_with_invalid_uuid(
+    client: AsyncClient,
+) -> None:
     await _create_user_and_login(client)
     response = await client.get(
         "/v1/specialist/invalid_uuid",
@@ -95,7 +99,9 @@ async def test_get_my_specialists(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_my_specialists_failed_without_authentication(client: AsyncClient) -> None:
+async def test_get_my_specialists_failed_without_authentication(
+    client: AsyncClient,
+) -> None:
     response = await client.get(
         "/v1/specialist/",
     )
@@ -344,7 +350,9 @@ async def test_delete_experience_failed_with_invalid_uuid(client: AsyncClient) -
 
 
 @pytest.mark.asyncio
-async def test_delete_experience_failed_with_nonexistent_experience(client: AsyncClient) -> None:
+async def test_delete_experience_failed_with_nonexistent_experience(
+    client: AsyncClient,
+) -> None:
     await _create_user_and_login(client)
     specialist = await client.post(
         "/v1/specialist/",

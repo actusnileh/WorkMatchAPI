@@ -1,4 +1,0 @@
-[flake8]
-exclude = __init__.py,env.py
-extend-ignore = A005, DUO102, DUO103
-max-line-length = 120

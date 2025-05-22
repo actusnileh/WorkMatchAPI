@@ -115,7 +115,9 @@ async def test_get_vacancy_by_uuid(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_vacancy_by_uuid_failed_with_invalid_uuid(client: AsyncClient) -> None:
+async def test_get_vacancy_by_uuid_failed_with_invalid_uuid(
+    client: AsyncClient,
+) -> None:
     await _create_hr_and_login(client)
     response = await client.get("/v1/vacancies/invalid_uuid")
     assert response.status_code == 422

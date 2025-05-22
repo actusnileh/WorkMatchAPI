@@ -104,7 +104,9 @@ async def test_delete_application(client: AsyncClient, create_vacancy, create_sp
 
 
 @pytest.mark.asyncio
-async def test_get_applications_failed_with_invalid_uuid_or_auth(client: AsyncClient) -> None:
+async def test_get_applications_failed_with_invalid_uuid_or_auth(
+    client: AsyncClient,
+) -> None:
     response = await client.get(
         "/v1/applications/invalid_uuid/invalid_uuid",
     )
@@ -113,7 +115,9 @@ async def test_get_applications_failed_with_invalid_uuid_or_auth(client: AsyncCl
 
 
 @pytest.mark.asyncio
-async def test_delete_application_failed_with_invalid_uuid_or_auth(client: AsyncClient) -> None:
+async def test_delete_application_failed_with_invalid_uuid_or_auth(
+    client: AsyncClient,
+) -> None:
     response = await client.delete(
         "/v1/applications/invalid_uuid/invalid_uuid",
     )
@@ -122,7 +126,9 @@ async def test_delete_application_failed_with_invalid_uuid_or_auth(client: Async
 
 
 @pytest.mark.asyncio
-async def test_create_application_failed_with_invalid_uuid_or_auth(client: AsyncClient) -> None:
+async def test_create_application_failed_with_invalid_uuid_or_auth(
+    client: AsyncClient,
+) -> None:
     response = await client.post(
         "/v1/applications/invalid_uuid/invalid_uuid",
     )
