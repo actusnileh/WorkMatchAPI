@@ -2,7 +2,10 @@ from fastapi import (
     HTTPException,
     status,
 )
+from app.schemas.responses.vacancy import VacancyResponse
+from core.config import config
 
+import httpx
 from pydantic import UUID4
 
 from app.models import (
@@ -183,3 +186,25 @@ class VacancyController(BaseController[Vacancy]):
         Удаление вакансии из индекса Elasticsearch.
         """
         await es_client.delete(index="vacancies", id=vacancy_id)
+
+    async def get_summary_from_neural(self, vacancy_uuid: str) -> str:
+        vacancy = await self.vacancy_repository.get_by_uuid(vacancy_uuid)
+        if not vacancy:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Вакансия не найдена.",
+            )
+        vacancy_data = VacancyResponse.from_orm(vacancy)
+        vacancy_json = vacancy_data.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+        async with httpx.AsyncClient(
+            base_url=config.NEURAL_SERVICE_URL,
+            timeout=httpx.Timeout(230.0, connect=5.0),
+            limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
+        ) as client:
+            resp = await client.post(
+                url="/summary",
+                json=vacancy_json,
+            )
+            data = resp.text
+
+        return data

@@ -6,6 +6,7 @@ from fastapi import (
 )
 
 from app.controllers import AnalysisController
+from app.controllers.vacancy import VacancyController
 from app.schemas.responses.analysis import (
     AnalysisResponse,
     ListAnalysisResponse,
@@ -14,6 +15,21 @@ from core.factory import Factory
 
 
 analyse_router = APIRouter()
+
+
+@analyse_router.get(
+    "/summarize/{vacancy_uuid}",
+    response_model=str,
+    summary="Получить суммарный анализ",
+)
+async def get_summary(
+    vacancy_uuid: UUID,
+    vacancy_controller: VacancyController = Depends(Factory().get_vacancy_controller),
+) -> str:
+    """
+    Возвращает суммарный анализ  пользователя на указанную вакансию и специалиста.
+    """
+    return await vacancy_controller.get_summary_from_neural(vacancy_uuid)
 
 
 @analyse_router.get(
